@@ -26,7 +26,7 @@ class GeofenceManager(private val context: Context) {
 
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun addGeofences() {
-        val geofenceList = LisbonSubwayStations.stations.map { station ->
+        val geofenceList = LisbonTransportStations.stations.map { station ->
             createGeofence(station.id, station.lat, station.lng)
         }
 
@@ -40,10 +40,6 @@ class GeofenceManager(private val context: Context) {
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
-    }
-
-    fun removeGeofences() {
-        geofencingClient.removeGeofences(geofencePendingIntent)
     }
 
     private fun createGeofence(id: String, lat: Double, lng: Double): Geofence {
