@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 fun DetectorScreen(viewModel: DetectorViewModel) {
     val currentState by viewModel.state.collectAsState()
     val currentActivity by viewModel.currentActivity.collectAsState()
+    val isInsideGeofence by viewModel.isInsideGeofence.collectAsState()
 
     val (color, text, icon) = when (currentState) {
         TransportState.EXTERIOR -> Triple(
@@ -86,6 +87,15 @@ fun DetectorScreen(viewModel: DetectorViewModel) {
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.secondary,
             fontWeight = FontWeight.Medium
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = if (isInsideGeofence) "Dentro do Geofence" else "Fora do Geofence",
+            color = if (isInsideGeofence) Color(0xFF4CAF50) else Color.Red,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }
