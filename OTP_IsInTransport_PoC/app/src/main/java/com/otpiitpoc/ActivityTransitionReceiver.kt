@@ -11,7 +11,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
             val result = ActivityTransitionResult.extractResult(intent)
             result?.transitionEvents?.forEach { event ->
                 if (event.transitionType == 0) {
-                    DetectorViewModel.getInstance().onActivityTransition(event.activityType)
+                    DetectorViewModel.getInstance().onActivityUpdate(event.activityType, 100)
                 }
             }
         }

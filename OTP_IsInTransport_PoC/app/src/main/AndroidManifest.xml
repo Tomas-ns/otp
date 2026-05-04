@@ -35,7 +35,7 @@
             android:exported="true" />
 
         <receiver
-            android:name=".ActivityTransitionReceiver"
+            android:name=".ActivityRecognitionReceiver"
             android:enabled="true"
             android:exported="true" />
 
