@@ -23,7 +23,7 @@ class ActivityRecognitionManager(private val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun requestActivityUpdates() {
-        activityRecognitionClient.requestActivityUpdates(3000, activityPendingIntent)
+        activityRecognitionClient.requestActivityUpdates(3000L, activityPendingIntent)
     }
 
 }

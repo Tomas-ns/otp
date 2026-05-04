@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun DetectorScreen(viewModel: DetectorViewModel) {
     val currentState by viewModel.state.collectAsState()
+    val currentActivity by viewModel.currentActivity.collectAsState()
 
     val (color, text, icon) = when (currentState) {
         TransportState.EXTERIOR -> Triple(
@@ -79,7 +79,13 @@ fun DetectorScreen(viewModel: DetectorViewModel) {
             color = MaterialTheme.colorScheme.onSurface
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
+        Text(
+            text = "Current AR API state: $currentActivity",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.secondary,
+            fontWeight = FontWeight.Medium
+        )
     }
 }

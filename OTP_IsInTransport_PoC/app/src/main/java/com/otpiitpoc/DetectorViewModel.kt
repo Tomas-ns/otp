@@ -15,6 +15,9 @@ class DetectorViewModel : ViewModel() {
     private val _state = MutableStateFlow(TransportState.EXTERIOR)
     val state: StateFlow<TransportState> = _state.asStateFlow()
 
+    private val _currentActivity = MutableStateFlow("STILL (0%)")
+    val currentActivity: StateFlow<String> = _currentActivity.asStateFlow()
+
     private var lastDetectedActivity = DetectedActivity.STILL
     private var lastConfidence = 0
     private var isInsideGeofence = false
@@ -35,7 +38,10 @@ class DetectorViewModel : ViewModel() {
         lastDetectedActivity = activityType
         lastConfidence = confidence
         
-        Log.d("DetectorViewModel", "Activity: ${getActivityName(activityType)} ($confidence%)")
+        val activityName = getActivityName(activityType)
+        _currentActivity.value = "$activityName ($confidence%)"
+        
+        Log.d("DetectorViewModel", "Activity: $activityName ($confidence%)")
 
         if (_state.value == TransportState.AT_STATION && 
             previousActivity == DetectedActivity.STILL && 
