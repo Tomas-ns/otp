@@ -38,7 +38,6 @@ class DetectorViewModel : ViewModel() {
     }
 
     fun onActivityUpdate(activityType: Int, confidence: Int) {
-        val previousActivity = lastDetectedActivity
         lastDetectedActivity = activityType
         lastConfidence = confidence
 
@@ -47,15 +46,6 @@ class DetectorViewModel : ViewModel() {
 
         val activityName = getActivityName(activityType)
         _currentActivity.value = "$activityName ($confidence%)"
-
-        Log.d("DetectorViewModel", "Activity: $activityName ($confidence%)")
-
-        if (_state.value == TransportState.AT_STATION &&
-            previousActivity == DetectedActivity.STILL &&
-            activityType == DetectedActivity.UNKNOWN) {
-            _state.value = TransportState.IN_TRANSIT
-            Log.d("DetectorViewModel", "State changed to IN_TRANSIT (STILL -> UNKNOWN transition)")
-        }
 
         evaluateState()
     }
@@ -66,8 +56,7 @@ class DetectorViewModel : ViewModel() {
         val currentState = _state.value
         val isPedestrian = lastDetectedActivity == DetectedActivity.WALKING ||
                 lastDetectedActivity == DetectedActivity.STILL ||
-                (lastDetectedActivity == DetectedActivity.ON_FOOT)
-
+                lastDetectedActivity == DetectedActivity.ON_FOOT
         val inGeofence = _isInsideGeofence.value
 
         when (currentState) {
@@ -77,20 +66,15 @@ class DetectorViewModel : ViewModel() {
                 }
             }
             TransportState.AT_STATION -> {
-                if (lastDetectedActivity == DetectedActivity.IN_VEHICLE) {
+                if (activityBuffer.contains(DetectedActivity.IN_VEHICLE) || lastDetectedActivity == DetectedActivity.IN_VEHICLE) {
                     _state.value = TransportState.IN_TRANSIT
-                } else if (!inGeofence && !isPedestrian) {
-                    _state.value = TransportState.IN_TRANSIT
-                } else if (activityBuffer.all { it == DetectedActivity.UNKNOWN }) {
-                    _state.value = TransportState.IN_TRANSIT
-                } else if (!inGeofence) {
+                } else if (!inGeofence && isPedestrian) {
                     _state.value = TransportState.EXTERIOR
                 }
             }
             TransportState.IN_TRANSIT -> {
                 if (inGeofence && isPedestrian && lastConfidence > 50) {
                     _state.value = TransportState.DESTINATION_REACHED
-                    resetAfterDelay()
                 } else if (!inGeofence && isPedestrian && lastConfidence > 70) {
                     _state.value = TransportState.DESTINATION_REACHED
                 }
