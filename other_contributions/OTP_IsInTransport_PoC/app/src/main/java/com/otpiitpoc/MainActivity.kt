@@ -1,6 +1,7 @@
 package com.otpiitpoc
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -27,10 +28,16 @@ class MainActivity : ComponentActivity() {
         } else {
             true
         }
+        val postNotificationsGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
+        } else {
+            true
+        }
         
-        if (fineLocationGranted && activityRecognitionGranted) {
+        if (fineLocationGranted && activityRecognitionGranted && postNotificationsGranted) {
             setupManagers()
             checkBackgroundLocation()
+            startTransportService()
         } else {
             Toast.makeText(this, "Permissions required for PoC", Toast.LENGTH_LONG).show()
         }
@@ -69,6 +76,10 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             permissionsToRequest.add(Manifest.permission.ACTIVITY_RECOGNITION)
         }
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         val missingPermissions = permissionsToRequest.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
@@ -77,6 +88,7 @@ class MainActivity : ComponentActivity() {
         if (missingPermissions.isEmpty()) {
             setupManagers()
             checkBackgroundLocation()
+            startTransportService()
         } else {
             requestPermissionLauncher.launch(missingPermissions.toTypedArray())
         }
@@ -100,6 +112,15 @@ class MainActivity : ComponentActivity() {
             activityRecognitionManager.requestActivityUpdates()
         } catch (e: SecurityException) {
             Toast.makeText(this, "Security Exception: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun startTransportService() {
+        val intent = Intent(this, TransportForegroundService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
         }
     }
 }
