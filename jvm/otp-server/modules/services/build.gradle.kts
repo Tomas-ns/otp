@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.spring") version "2.1.20"
+    kotlin("jvm")
+    kotlin("plugin.spring")
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -16,5 +16,7 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":domain"))
+    implementation(project(":repository"))
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 }

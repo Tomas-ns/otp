@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.jpa") version "2.1.20"
-    kotlin("plugin.allopen") version "2.1.20"
+    kotlin("jvm")
+    kotlin("plugin.jpa")
+    kotlin("plugin.allopen")
 }
 
 java {

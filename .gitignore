@@ -14,3 +14,12 @@
 .cxx
 local.properties
 google-services.json
+
+# Secrets e config local (nunca commitar)
+.env
+.env.*
+application-local.yml
+application-dev.yml
+*-credentials.json
+service-account*.json
+**/service-account*.json

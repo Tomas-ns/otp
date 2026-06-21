@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.spring") version "2.1.20"
+    kotlin("jvm")
+    kotlin("plugin.spring")
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -19,4 +19,5 @@ dependencies {
     implementation(project(":services"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 }

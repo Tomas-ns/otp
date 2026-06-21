@@ -1,3 +1,16 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    plugins {
+        kotlin("jvm") version "2.1.20"
+        kotlin("plugin.spring") version "2.1.20"
+        kotlin("plugin.jpa") version "2.1.20"
+        kotlin("plugin.allopen") version "2.1.20"
+    }
+}
+
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
@@ -25,4 +38,3 @@ project(":services").projectDir = file("modules/services")
 
 include("repository")
 project(":repository").projectDir = file("modules/repository")
-
