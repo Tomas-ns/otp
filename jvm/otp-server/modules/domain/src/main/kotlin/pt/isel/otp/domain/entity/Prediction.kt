@@ -23,8 +23,11 @@ class Prediction(
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "station_id", nullable = false)
     val station: Station,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    val user: User? = null,
     @Column(nullable = false)
-    val occupancyLevel: Int,
+    val occupancyLevel: Short,
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     val type: PredictionType,

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: otp-postgres
+    environment:
+      POSTGRES_DB: otp
+      POSTGRES_USER: otp_app
+      POSTGRES_PASSWORD: otp_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - otp_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U otp_app -d otp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  otp_pg_data:
