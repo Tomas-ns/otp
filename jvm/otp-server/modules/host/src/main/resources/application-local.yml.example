@@ -1,0 +1,23 @@
+# Copiar para application-local.yml (gitignored) e ajustar valores.
+# Ativar com: SPRING_PROFILES_ACTIVE=local
+
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/otp
+    username: otp_app
+    password: otp_app
+
+otp:
+  auth:
+    oauth:
+      google:
+        client-id: YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
+
+# Variáveis alternativas (PowerShell):
+# $env:DB_HOST="127.0.0.1"
+# $env:DB_PORT="5432"
+# $env:DB_NAME="otp"
+# $env:DB_USER="otp_app"
+# $env:DB_PASSWORD="otp_app"
+# $env:GOOGLE_OAUTH_CLIENT_ID="..."
+# $env:JWT_SECRET="..."   # gerar string aleatória >= 256 bits
