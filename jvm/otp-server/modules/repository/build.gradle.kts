@@ -8,7 +8,11 @@ java {
     toolchain { languageVersion.set(JavaLanguageVersion.of(23)) }
 }
 
-
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.6")
+    }
+}
 
 dependencies {
     implementation(project(":domain"))

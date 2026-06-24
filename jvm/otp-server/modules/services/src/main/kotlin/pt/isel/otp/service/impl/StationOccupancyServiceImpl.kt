@@ -6,13 +6,14 @@ import pt.isel.otp.domain.entity.Prediction
 import pt.isel.otp.domain.enums.PredictionType
 import pt.isel.otp.repository.PredictionRepository
 import pt.isel.otp.repository.StationRepository
+import pt.isel.otp.service.InferenceService
 import pt.isel.otp.service.StationOccupancyService
-import kotlin.random.Random
 
 @Service
 class StationOccupancyServiceImpl(
     private val stationRepository: StationRepository,
     private val predictionRepository: PredictionRepository,
+    private val inferenceService: InferenceService,
 ) : StationOccupancyService {
     override fun getLimitedPrediction(
         stationId: String,
@@ -21,7 +22,7 @@ class StationOccupancyServiceImpl(
         val station = stationRepository.findById(stationId)
             .orElseThrow { NoSuchElementException("Station not found: $stationId") }
 
-        val occupancyLevel = Random.nextInt(1, 6).toShort()
+        val occupancyLevel = inferenceService.predictLimited(station, timestamp).toShort()
 
         val prediction = Prediction(
             station = station,

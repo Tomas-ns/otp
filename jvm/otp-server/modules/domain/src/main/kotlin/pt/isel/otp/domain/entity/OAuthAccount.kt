@@ -41,5 +41,5 @@ class OAuthAccount(
     val providerUsername: String? = null,
     @Column(nullable = false)
     val createdAt: Instant = Instant.now(),
-    val lastUsedAt: Instant? = null,
+    var lastUsedAt: Instant? = null,
 )

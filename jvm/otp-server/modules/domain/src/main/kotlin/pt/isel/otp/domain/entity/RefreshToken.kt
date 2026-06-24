@@ -26,12 +26,12 @@ class RefreshToken(
     val tokenHash: String,
     @Column(nullable = false)
     val expiresAt: Instant,
-    val revokedAt: Instant? = null,
+    var revokedAt: Instant? = null,
     @Column(nullable = false)
     val createdAt: Instant = Instant.now(),
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "replaced_by_id")
-    val replacedBy: RefreshToken? = null,
+    var replacedBy: RefreshToken? = null,
     @Column(columnDefinition = "TEXT")
     val userAgent: String? = null,
     @Column(columnDefinition = "inet")

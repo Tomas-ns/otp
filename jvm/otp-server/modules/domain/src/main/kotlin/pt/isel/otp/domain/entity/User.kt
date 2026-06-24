@@ -30,6 +30,6 @@ class User(
     @Column(nullable = false)
     val createdAt: Instant = Instant.now(),
     @Column(nullable = false)
-    val updatedAt: Instant = Instant.now(),
-    val lastLoginAt: Instant? = null,
+    var updatedAt: Instant = Instant.now(),
+    var lastLoginAt: Instant? = null,
 )
