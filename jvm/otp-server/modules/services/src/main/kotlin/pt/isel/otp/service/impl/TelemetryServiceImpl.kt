@@ -21,7 +21,7 @@ class TelemetryServiceImpl(
 ) : TelemetryService {
     override fun ingest(request: TelemetryRequest, userId: UUID): TelemetryResponse {
         val station = locationService.findNearest(request.latitude, request.longitude)
-        val occupancyLevel = inferenceService.predictComplete(request, station).toShort()
+        val occupancyLevel = inferenceService.predictComplete(request, station, userId).toShort()
         val user = userRepository.findById(userId)
             .orElseThrow { IllegalStateException("User not found") }
 

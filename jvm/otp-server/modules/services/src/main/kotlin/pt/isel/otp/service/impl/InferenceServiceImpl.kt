@@ -8,11 +8,17 @@ import pt.isel.otp.domain.dto.request.TelemetryRequest
 import pt.isel.otp.domain.entity.Station
 import pt.isel.otp.service.InferenceService
 import weka.classifiers.Classifier
+import weka.classifiers.trees.RandomForest
+import weka.classifiers.trees.RandomTree
 import weka.core.Attribute
 import weka.core.DenseInstance
+import weka.core.Instance
 import weka.core.Instances
 import weka.core.SerializationHelper
-import java.util.Calendar
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.ZoneId
+import java.util.UUID
 
 @Service
 class InferenceServiceImpl(
@@ -25,6 +31,10 @@ class InferenceServiceImpl(
     private var completeHeader: Instances? = null
     private var limitedHeader: Instances? = null
 
+    companion object {
+        private val LISBON_ZONE = ZoneId.of("Europe/Lisbon")
+    }
+
     @PostConstruct
     fun init() {
         loadCompleteModel()
@@ -34,13 +44,11 @@ class InferenceServiceImpl(
     private fun loadCompleteModel() {
         try {
             val resource = resourceLoader.getResource("classpath:models/complete.model")
-            if (!resource.exists()) {
-                log.warn("COMPLETE model not found at models/complete.model")
-                return
-            }
-            completeClassifier = SerializationHelper.read(resource.inputStream) as Classifier
-            completeHeader = createCompleteHeader()
-            log.info("COMPLETE model loaded successfully")
+            if (!resource.exists()) { log.warn("COMPLETE model not found"); return }
+            val model = SerializationHelper.read(resource.inputStream) as Classifier
+            completeClassifier = model
+            completeHeader = extractInternalHeader(model)
+            log.info("COMPLETE model loaded (${completeHeader?.numAttributes()} attrs)")
         } catch (e: Exception) {
             log.error("Failed to load COMPLETE model", e)
         }
@@ -49,133 +57,125 @@ class InferenceServiceImpl(
     private fun loadLimitedModel() {
         try {
             val resource = resourceLoader.getResource("classpath:models/limited.model")
-            if (!resource.exists()) {
-                log.warn("LIMITED model not found at models/limited.model")
-                return
-            }
-            limitedClassifier = SerializationHelper.read(resource.inputStream) as Classifier
-            limitedHeader = createLimitedHeader()
-            log.info("LIMITED model loaded successfully")
+            if (!resource.exists()) { log.warn("LIMITED model not found"); return }
+            val model = SerializationHelper.read(resource.inputStream) as Classifier
+            limitedClassifier = model
+            limitedHeader = extractInternalHeader(model)
+            log.info("LIMITED model loaded (${limitedHeader?.numAttributes()} attrs)")
         } catch (e: Exception) {
             log.error("Failed to load LIMITED model", e)
         }
     }
 
-    private fun createCompleteHeader(): Instances {
-        val transportTypeValues = ArrayList<String>().apply {
-            add("METRO")
-            add("TRAIN")
+    private fun extractInternalHeader(model: Classifier): Instances {
+        if (model is RandomForest) {
+            var cls: Class<*> = model.javaClass
+            while (cls != Any::class.java) {
+                try {
+                    val field = cls.getDeclaredField("m_Classifiers")
+                    field.isAccessible = true
+                    val classifiers = field.get(model) as Array<Classifier>
+                    val firstTree = classifiers[0] as RandomTree
+                    val infoField = RandomTree::class.java.getDeclaredField("m_Info")
+                    infoField.isAccessible = true
+                    return infoField.get(firstTree) as Instances
+                } catch (_: NoSuchFieldException) {
+                    cls = cls.superclass
+                }
+            }
         }
-        val dayOfWeekValues = ArrayList<String>().apply {
-            for (i in 1..7) add(i.toString())
-        }
-        val ratingValues = ArrayList<String>().apply {
-            for (i in 1..5) add(i.toString())
-        }
-
-        val attrs = ArrayList<Attribute>().apply {
-            add(Attribute("transportType", transportTypeValues))
-            add(Attribute("timestamp"))
-            add(Attribute("dayOfWeek", dayOfWeekValues))
-            add(Attribute("hour"))
-            add(Attribute("latitude"))
-            add(Attribute("longitude"))
-            add(Attribute("bluetoothCount"))
-            add(Attribute("bt_signal_1"))
-            add(Attribute("bt_signal_2"))
-            add(Attribute("bt_signal_3"))
-            add(Attribute("bt_signal_4"))
-            add(Attribute("bt_signal_5"))
-            add(Attribute("wifiCount"))
-            add(Attribute("wf_signal_1"))
-            add(Attribute("wf_signal_2"))
-            add(Attribute("wf_signal_3"))
-            add(Attribute("wf_signal_4"))
-            add(Attribute("wf_signal_5"))
-            add(Attribute("latencyAvg"))
-            add(Attribute("latencyStdDev"))
-            add(Attribute("packetLoss"))
-            add(Attribute("rsrp"))
-            add(Attribute("rssnr"))
-            add(Attribute("rsrq"))
-            add(Attribute("subjectiveRating", ratingValues))
-        }
-
-        val header = Instances("subjective_occupancy_prediction", attrs, 0)
-        header.setClassIndex(header.numAttributes() - 1)
-        return header
+        throw IllegalStateException("Cannot extract header from ${model.javaClass.name}")
     }
 
-    private fun createLimitedHeader(): Instances {
-        val ratingValues = ArrayList<String>().apply {
-            for (i in 1..5) add(i.toString())
-        }
-
-        val attrs = ArrayList<Attribute>().apply {
-            add(Attribute("timestamp"))
-            add(Attribute("latitude"))
-            add(Attribute("longitude"))
-            add(Attribute("subjectiveRating", ratingValues))
-        }
-
-        val header = Instances("limited_occupancy_prediction", attrs, 0)
-        header.setClassIndex(header.numAttributes() - 1)
-        return header
+    private fun setNominal(inst: Instance, attr: Attribute, value: String) {
+        val idx = attr.indexOfValue(value)
+        if (idx >= 0) inst.setValue(attr, idx.toDouble())
     }
 
-    override fun predictComplete(request: TelemetryRequest, station: Station): Int {
+    override fun predictComplete(request: TelemetryRequest, station: Station, userId: UUID): Int {
         val classifier = completeClassifier ?: return fallbackPrediction()
         val header = completeHeader ?: return fallbackPrediction()
 
-        val cal = Calendar.getInstance().apply {
-            timeInMillis = request.timestamp
+        val zdt = Instant.ofEpochMilli(request.timestamp).atZone(LISBON_ZONE)
+        val inst = DenseInstance(header.numAttributes())
+        inst.setDataset(header)
+
+        for (i in 0 until header.numAttributes()) {
+            if (i == header.classIndex()) continue
+            val a = header.attribute(i)
+            when (a.name()) {
+                "transportType" -> setNominal(inst, a, station.transportType.name)
+                "timestamp" -> inst.setValue(i, request.timestamp.toDouble())
+                "dayOfWeek" -> inst.setValue(i, zdt.dayOfWeek.value.toDouble())
+                "hour" -> inst.setValue(i, zdt.hour.toDouble())
+                "isWeekend" -> inst.setValue(i,
+                    if (zdt.dayOfWeek == DayOfWeek.SATURDAY || zdt.dayOfWeek == DayOfWeek.SUNDAY) 1.0 else 0.0)
+                "isRushHour" -> inst.setValue(i,
+                    if (zdt.hour in 7..10 || zdt.hour in 17..20) 1.0 else 0.0)
+                "latitude" -> inst.setValue(i, request.latitude)
+                "longitude" -> inst.setValue(i, request.longitude)
+                "bluetoothCount" -> inst.setValue(i, request.bluetoothCount.toDouble())
+                "bt_signal_1" -> inst.setValue(i, request.bluetoothSignals[0].toDouble())
+                "bt_signal_2" -> inst.setValue(i, request.bluetoothSignals[1].toDouble())
+                "bt_signal_3" -> inst.setValue(i, request.bluetoothSignals[2].toDouble())
+                "bt_signal_4" -> inst.setValue(i, request.bluetoothSignals[3].toDouble())
+                "bt_signal_5" -> inst.setValue(i, request.bluetoothSignals[4].toDouble())
+                "wifiCount" -> inst.setValue(i, request.wifiCount.toDouble())
+                "wf_signal_1" -> inst.setValue(i, request.wifiSignals[0].toDouble())
+                "wf_signal_2" -> inst.setValue(i, request.wifiSignals[1].toDouble())
+                "wf_signal_3" -> inst.setValue(i, request.wifiSignals[2].toDouble())
+                "wf_signal_4" -> inst.setValue(i, request.wifiSignals[3].toDouble())
+                "wf_signal_5" -> inst.setValue(i, request.wifiSignals[4].toDouble())
+                "latencyAvg" -> inst.setValue(i, request.latencyAvg)
+                "latencyStdDev" -> inst.setValue(i, request.latencyStdDev)
+                "packetLoss" -> inst.setValue(i, request.packetLoss)
+                "rsrp" -> inst.setValue(i, request.rsrp.toDouble())
+                "rssnr" -> inst.setValue(i, request.rssnr.toDouble())
+                "rsrq" -> inst.setValue(i, request.rsrq.toDouble())
+            }
         }
-        val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK).toDouble()
-        val hour = cal.get(Calendar.HOUR_OF_DAY).toDouble()
 
-        val instance = DenseInstance(header.numAttributes())
-        instance.setDataset(header)
-        instance.setValue(header.attribute("transportType"), station.transportType.name)
-        instance.setValue(header.attribute("timestamp"), request.timestamp.toDouble())
-        instance.setValue(header.attribute("dayOfWeek"), dayOfWeek)
-        instance.setValue(header.attribute("hour"), hour)
-        instance.setValue(header.attribute("latitude"), request.latitude)
-        instance.setValue(header.attribute("longitude"), request.longitude)
-        instance.setValue(header.attribute("bluetoothCount"), request.bluetoothCount.toDouble())
-        instance.setValue(header.attribute("bt_signal_1"), request.bluetoothSignals[0].toDouble())
-        instance.setValue(header.attribute("bt_signal_2"), request.bluetoothSignals[1].toDouble())
-        instance.setValue(header.attribute("bt_signal_3"), request.bluetoothSignals[2].toDouble())
-        instance.setValue(header.attribute("bt_signal_4"), request.bluetoothSignals[3].toDouble())
-        instance.setValue(header.attribute("bt_signal_5"), request.bluetoothSignals[4].toDouble())
-        instance.setValue(header.attribute("wifiCount"), request.wifiCount.toDouble())
-        instance.setValue(header.attribute("wf_signal_1"), request.wifiSignals[0].toDouble())
-        instance.setValue(header.attribute("wf_signal_2"), request.wifiSignals[1].toDouble())
-        instance.setValue(header.attribute("wf_signal_3"), request.wifiSignals[2].toDouble())
-        instance.setValue(header.attribute("wf_signal_4"), request.wifiSignals[3].toDouble())
-        instance.setValue(header.attribute("wf_signal_5"), request.wifiSignals[4].toDouble())
-        instance.setValue(header.attribute("latencyAvg"), request.latencyAvg)
-        instance.setValue(header.attribute("latencyStdDev"), request.latencyStdDev)
-        instance.setValue(header.attribute("packetLoss"), request.packetLoss)
-        instance.setValue(header.attribute("rsrp"), request.rsrp.toDouble())
-        instance.setValue(header.attribute("rssnr"), request.rssnr.toDouble())
-        instance.setValue(header.attribute("rsrq"), request.rsrq.toDouble())
-
-        val predictionIdx = classifier.classifyInstance(instance).toInt()
-        return header.classAttribute().value(predictionIdx).toInt()
+        return try {
+            val idx = classifier.classifyInstance(inst).toInt()
+            header.classAttribute().value(idx).toInt()
+        } catch (e: Exception) {
+            log.warn("COMPLETE prediction failed: ${e.message}")
+            fallbackPrediction()
+        }
     }
 
     override fun predictLimited(station: Station, timestamp: Long): Int {
         val classifier = limitedClassifier ?: return fallbackPrediction()
         val header = limitedHeader ?: return fallbackPrediction()
 
-        val instance = DenseInstance(header.numAttributes())
-        instance.setDataset(header)
-        instance.setValue(header.attribute("timestamp"), timestamp.toDouble())
-        instance.setValue(header.attribute("latitude"), station.latitude)
-        instance.setValue(header.attribute("longitude"), station.longitude)
+        val zdt = Instant.ofEpochMilli(timestamp).atZone(LISBON_ZONE)
+        val inst = DenseInstance(header.numAttributes())
+        inst.setDataset(header)
 
-        val predictionIdx = classifier.classifyInstance(instance).toInt()
-        return header.classAttribute().value(predictionIdx).toInt()
+        for (i in 0 until header.numAttributes()) {
+            if (i == header.classIndex()) continue
+            val a = header.attribute(i)
+            when (a.name()) {
+                "transportType" -> setNominal(inst, a, station.transportType.name)
+                "timestamp" -> inst.setValue(i, timestamp.toDouble())
+                "dayOfWeek" -> inst.setValue(i, zdt.dayOfWeek.value.toDouble())
+                "hour" -> inst.setValue(i, zdt.hour.toDouble())
+                "isWeekend" -> inst.setValue(i,
+                    if (zdt.dayOfWeek == DayOfWeek.SATURDAY || zdt.dayOfWeek == DayOfWeek.SUNDAY) 1.0 else 0.0)
+                "isRushHour" -> inst.setValue(i,
+                    if (zdt.hour in 7..10 || zdt.hour in 17..20) 1.0 else 0.0)
+                "latitude" -> inst.setValue(i, station.latitude)
+                "longitude" -> inst.setValue(i, station.longitude)
+            }
+        }
+
+        return try {
+            val idx = classifier.classifyInstance(inst).toInt()
+            header.classAttribute().value(idx).toInt()
+        } catch (e: Exception) {
+            log.warn("LIMITED prediction failed: ${e.message}")
+            fallbackPrediction()
+        }
     }
 
     private fun fallbackPrediction(): Int = 3
