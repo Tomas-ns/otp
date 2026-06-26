@@ -15,6 +15,7 @@ import pt.isel.otp.domain.enums.UserStatus
 import pt.isel.otp.repository.OAuthAccountRepository
 import pt.isel.otp.repository.UserRepository
 import java.time.Instant
+import java.util.UUID
 
 @Service
 class AuthService(
@@ -119,5 +120,32 @@ class AuthService(
     @Transactional
     fun logout(rawRefreshToken: String) {
         refreshTokenService.revokeRefreshToken(rawRefreshToken)
+    }
+
+    @Transactional
+    fun generateTestToken(userAgent: String?, ipAddress: String?): AuthResponse {
+        val user = userRepository.findById(TEST_USER_ID)
+            .orElseThrow { IllegalStateException("Test user not found. Run V3 migration first.") }
+        user.lastLoginAt = Instant.now()
+        user.updatedAt = Instant.now()
+        userRepository.save(user)
+
+        val accessToken = jwtService.generateAccessToken(TEST_USER_ID)
+        val (rawRefreshToken, _) = refreshTokenService.createRefreshToken(TEST_USER_ID, userAgent, ipAddress)
+
+        return AuthResponse(
+            accessToken = accessToken,
+            refreshToken = rawRefreshToken,
+            user = UserResponse(
+                id = TEST_USER_ID,
+                email = user.email,
+                displayName = user.displayName,
+                avatarUrl = user.avatarUrl,
+            ),
+        )
+    }
+
+    companion object {
+        private val TEST_USER_ID = UUID.fromString("a0000000-0000-0000-0000-000000000001")
     }
 }

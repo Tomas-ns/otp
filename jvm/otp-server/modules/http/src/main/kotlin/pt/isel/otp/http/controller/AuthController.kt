@@ -37,6 +37,15 @@ class AuthController(
         return ResponseEntity.ok(response)
     }
 
+    @PostMapping("/token")
+    fun getTestToken(
+        httpRequest: HttpServletRequest,
+    ): AuthResponse {
+        val userAgent = httpRequest.getHeader("User-Agent")
+        val ipAddress = httpRequest.remoteAddr
+        return authService.generateTestToken(userAgent, ipAddress)
+    }
+
     @PostMapping("/logout")
     fun logout(
         @Valid @RequestBody request: TokenRefreshRequest,

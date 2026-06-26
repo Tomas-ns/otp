@@ -3,12 +3,6 @@ spring:
     name: otp-server
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
-
----
-spring:
-  config:
-    activate:
-      on-profile: local
   datasource:
     url: jdbc:postgresql://${DB_HOST:127.0.0.1}:${DB_PORT:5432}/${DB_NAME:otp}
     username: ${DB_USER:otp_app}
