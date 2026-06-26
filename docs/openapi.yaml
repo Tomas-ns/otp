@@ -1,0 +1,417 @@
+openapi: 3.0.3
+info:
+  title: OTP Backend — Occupancy Tracking & Prediction API
+  version: 1.0.0
+  description: |
+    API de crowdsourcing para previsão de ocupação de transportes públicos
+    (Metro + Comboios) em Lisboa. Recolhe telemetria dos dispositivos móveis,
+    aplica modelos Weka (RandomForest) para inferir o nível de ocupação e
+    disponibiliza um mapa em tempo real.
+
+    Stack: Kotlin 2.1.20 · Spring Boot 3.5.6 · PostgreSQL 16 · Flyway
+    Auth: JWT (HS512) + refresh token opaco
+    Deploy: GCP Compute Engine (otp-vm, 34.76.146.40)
+
+servers:
+  - url: http://34.76.146.40:8080
+    description: Produção (VM GCP)
+  - url: http://localhost:8080
+    description: Desenvolvimento local
+
+paths:
+  /api/v1/auth/token:
+    post:
+      tags: [Auth]
+      summary: Gerar token de teste
+      description: |
+        Endpoint público que gera um JWT para o utilizador de teste
+        (UUID a0000000-0000-0000-0000-000000000001).
+        Útil para testes manuais com curl/Postman.
+      responses:
+        '200':
+          description: Tokens gerados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/v1/auth/oauth/google:
+    post:
+      tags: [Auth]
+      summary: Login com Google OAuth
+      description: >
+        Endpoint público para autenticação com Google.
+        Recebe um idToken do Google Sign-In (Android) e devolve
+        accessToken JWT + refreshToken opaco.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleLoginRequest'
+      responses:
+        '201':
+          description: Autenticação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renovar access token
+      description: >
+        Endpoint público que recebe um refreshToken válido e devolve
+        um novo par accessToken + refreshToken (rotação).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          description: Token renovado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Terminar sessão
+      description: >
+        Endpoint autenticado que revoga o refreshToken fornecido.
+        Requer Authorization: Bearer <accessToken>.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '204':
+          description: Logout bem-sucedido (sem corpo)
+
+  /api/v1/telemetry:
+    post:
+      tags: [Telemetria]
+      summary: Enviar dados de telemetria
+      description: >
+        Endpoint autenticado que recebe leituras do dispositivo móvel
+        (bluetooth, Wi-Fi, celular, ping), determina a estação mais
+        próxima via Haversine e executa o modelo Weka COMPLETE (27
+        atributos) para devolver o nível de ocupação previsto.
+        A prediction é persistida com user_id.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelemetryRequest'
+      responses:
+        '201':
+          description: Predição COMPLETE gerada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/occupancy/map:
+    get:
+      tags: [Ocupação]
+      summary: Mapa de ocupação (94 estações)
+      description: >
+        Endpoint autenticado que devolve o nível de ocupação de todas
+        as 94 estações (56 Metro + 38 Comboio). Para cada estação,
+        retorna a prediction COMPLETE mais recente (se existir) ou
+        faz fallback para LIMITED. O nível é 1-5.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de 94 estações com ocupação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccupancyMapResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/occupancy/stations/{stationId}:
+    get:
+      tags: [Ocupação]
+      summary: Ocupação de uma estação específica
+      description: >
+        Endpoint autenticado que gera e persiste uma prediction LIMITED
+        (9 atributos, sem user_id) para a estação e timestamp indicados.
+        Útil para quando não há dados COMPLETE recentes.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: alameda_metro
+          description: >
+            Identificador único da estação (ex: alameda_metro,
+            oriente_metro, cais_do_sodre_train)
+        - name: timestamp
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1717776000
+          description: Unix timestamp (segundos) para a predição
+      responses:
+        '200':
+          description: Predição LIMITED gerada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationOccupancyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Estação não encontrada
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        JWT obtido via /api/v1/auth/token ou /api/v1/auth/oauth/google.
+        Algoritmo: HS512. TTL: 15 minutos.
+
+  schemas:
+    # ──────────── Auth ────────────
+    GoogleLoginRequest:
+      type: object
+      properties:
+        idToken:
+          type: string
+          description: Token do Google Sign-In (Android)
+      required: [idToken]
+
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: Token opaco de refresh
+      required: [refreshToken]
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT (HS512) para usar no header Authorization
+        refreshToken:
+          type: string
+          description: Token opaco para renovar access token
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: a0000000-0000-0000-0000-000000000001
+        email:
+          type: string
+          example: test@otp.local
+        displayName:
+          type: string
+          example: Test User
+        avatarUrl:
+          type: string
+          nullable: true
+
+    # ──────────── Telemetria ────────────
+    TelemetryRequest:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp da leitura
+          example: 1717776000
+        latitude:
+          type: number
+          format: double
+          example: 38.7223
+        longitude:
+          type: number
+          format: double
+          example: -9.1393
+        bluetoothCount:
+          type: integer
+          description: Número de dispositivos Bluetooth visíveis
+          example: 5
+        bluetoothSignals:
+          type: array
+          items:
+            type: integer
+          minItems: 5
+          maxItems: 5
+          description: 5 RSSI Bluetooth
+          example: [42, 43, 44, 45, 46]
+        wifiCount:
+          type: integer
+          description: Número de redes Wi-Fi visíveis
+          example: 5
+        wifiSignals:
+          type: array
+          items:
+            type: integer
+          minItems: 5
+          maxItems: 5
+          description: 5 RSSI Wi-Fi
+          example: [-45, -50, -55, -60, -65]
+        rsrp:
+          type: integer
+          description: Reference Signal Received Power (cellular)
+          example: -95
+        rssnr:
+          type: integer
+          description: Reference Signal Signal-to-Noise Ratio
+          example: 15
+        rsrq:
+          type: integer
+          description: Reference Signal Received Quality
+          example: -8
+        latencyAvg:
+          type: number
+          format: double
+          description: Latência média de ping (ms)
+          example: 45.2
+        latencyStdDev:
+          type: number
+          format: double
+          description: Desvio padrão da latência (ms)
+          example: 12.1
+        packetLoss:
+          type: number
+          format: double
+          description: Percentagem de perda de pacotes (0-100)
+          example: 0.5
+      required:
+        [timestamp, latitude, longitude, bluetoothCount, bluetoothSignals,
+         wifiCount, wifiSignals, rsrp, rssnr, rsrq, latencyAvg,
+         latencyStdDev, packetLoss]
+
+    TelemetryResponse:
+      type: object
+      properties:
+        stationId:
+          type: string
+          example: intendente_metro
+        stationName:
+          type: string
+          example: Intendente
+        occupancyLevel:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 5
+          example: 4
+        predictionType:
+          type: string
+          enum: [COMPLETE, LIMITED]
+          example: COMPLETE
+
+    # ──────────── Ocupação ────────────
+    OccupancyMapResponse:
+      type: object
+      properties:
+        stations:
+          type: array
+          items:
+            $ref: '#/components/schemas/StationOccupancyResponse'
+
+    StationOccupancyResponse:
+      type: object
+      properties:
+        stationId:
+          type: string
+          example: alameda_metro
+        name:
+          type: string
+          example: Alameda
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        transportType:
+          type: string
+          enum: [METRO, TRAIN]
+        occupancyLevel:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 5
+          example: 3
+        predictionType:
+          type: string
+          enum: [COMPLETE, LIMITED]
+          example: COMPLETE
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Estação não encontrada
+
+  responses:
+    Unauthorized:
+      description: Token ausente, inválido ou expirado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    BadRequest:
+      description: Erro de validação (campos em falta, tipos inválidos)
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/ErrorResponse'
+              - type: object
+                properties:
+                  message:
+                    type: string
+                  errors:
+                    type: object
+                    additionalProperties:
+                      type: string
