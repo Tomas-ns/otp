@@ -7,11 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
-import pt.isel.otp.domain.entity.Prediction
 import pt.isel.otp.domain.entity.Station
 import pt.isel.otp.domain.enums.PredictionType
 import pt.isel.otp.domain.enums.TransportType
-import pt.isel.otp.repository.PredictionRepository
 import pt.isel.otp.repository.StationRepository
 import pt.isel.otp.service.InferenceService
 import java.util.*
@@ -19,7 +17,6 @@ import java.util.*
 @ExtendWith(MockitoExtension::class)
 class StationOccupancyServiceImplTest {
     @Mock private lateinit var stationRepository: StationRepository
-    @Mock private lateinit var predictionRepository: PredictionRepository
     @Mock private lateinit var inferenceService: InferenceService
 
     private lateinit var stationOccupancyService: StationOccupancyServiceImpl
@@ -29,7 +26,7 @@ class StationOccupancyServiceImplTest {
 
     @BeforeEach
     fun setup() {
-        stationOccupancyService = StationOccupancyServiceImpl(stationRepository, predictionRepository, inferenceService)
+        stationOccupancyService = StationOccupancyServiceImpl(stationRepository, inferenceService)
     }
 
     @Test
@@ -41,15 +38,6 @@ class StationOccupancyServiceImplTest {
         assertEquals("Alameda", response.name)
         assertEquals(3, response.occupancyLevel)
         assertEquals(PredictionType.LIMITED, response.predictionType)
-        verify(predictionRepository).save(any<Prediction>())
-    }
-
-    @Test
-    fun `getLimitedPrediction saves prediction without user`() {
-        `when`(stationRepository.findById("alameda_metro")).thenReturn(Optional.of(station))
-        `when`(inferenceService.predictLimited(station, timestamp)).thenReturn(2)
-        stationOccupancyService.getLimitedPrediction("alameda_metro", timestamp)
-        verify(predictionRepository).save(argThat { p -> p.user == null && p.type == PredictionType.LIMITED })
     }
 
     @Test
