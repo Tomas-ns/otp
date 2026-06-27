@@ -1,5 +1,6 @@
 package pt.isel.map
 
+import android.graphics.Color
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import pt.isel.api.ApiAccess
 import pt.isel.domain.Station
+import pt.isel.domain.StationOccupancyResponse
 
 class MapViewModel(private val api: ApiAccess) : ViewModel() {
 
@@ -19,6 +21,10 @@ class MapViewModel(private val api: ApiAccess) : ViewModel() {
 
     private val _occupancyResult = MutableStateFlow<String?>(null)
     val occupancyResult: StateFlow<String?> = _occupancyResult.asStateFlow()
+
+
+    private val _currentPredictions = MutableStateFlow<List<StationOccupancyResponse>?>(null)
+    val currentPredictions: StateFlow<List<StationOccupancyResponse>?> = _currentPredictions.asStateFlow()
 
     fun selectStation(station: Station) {
         _selectedStation.value = station
@@ -49,6 +55,7 @@ class MapViewModel(private val api: ApiAccess) : ViewModel() {
         viewModelScope.launch {
             while (isActive) {
                 val predictions = api.fetchCompletePrediction()
+                _currentPredictions.value = predictions.stations
                 Log.e("API_DEBUG", "Predictions ${predictions.stations}")
 
                 delay(5 * 60 * 1000L)
