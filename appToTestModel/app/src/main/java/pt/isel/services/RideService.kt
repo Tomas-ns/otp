@@ -14,6 +14,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import pt.isel.OTPCDApplication
+import pt.isel.api.BackendApi
+import pt.isel.api.TelemetryRequest
 import pt.isel.datascan.viewmodel.state.DEFAULT_INTERVAL
 import pt.isel.datascan.viewmodel.state.DEFAULT_SUBJ_RATING
 import pt.isel.datascan.viewmodel.state.DEFAULT_TIMEOUT
@@ -286,6 +288,26 @@ class RideService : Service() {
 
             currentPrediction.value = predictedRating
             Log.d("RideService", " LOCAL ML PREDICTION: Occupancy Level $predictedRating ")
+
+            val telemetryRequest = TelemetryRequest(
+                timestamp = System.currentTimeMillis(),
+                latitude = location?.latitude ?: 0.0,
+                longitude = location?.longitude ?: 0.0,
+                bluetoothCount = bluetoothCount,
+                bluetoothSignals = signalIntensitiesBT,
+                wifiCount = wifiCount,
+                wifiSignals = signalIntensitiesWF,
+                rsrp = cellularMetrics.rsrp ?: 0,
+                rssnr = cellularMetrics.rssnr ?: 0,
+                rsrq = cellularMetrics.rsrq ?: 0,
+                latencyAvg = networkMetrics.latencyAvg,
+                latencyStdDev = networkMetrics.latencyStdDev,
+                packetLoss = networkMetrics.packetLoss,
+            )
+            val response = BackendApi.sendTelemetry(telemetryRequest)
+            if (response != null) {
+                Log.d("RideService", "Backend response: station=${response.stationName}, occupancy=${response.occupancyLevel}")
+            }
         }
     }
 

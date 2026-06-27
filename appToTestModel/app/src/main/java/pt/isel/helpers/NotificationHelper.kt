@@ -82,6 +82,16 @@ class NotificationHelper(private val context: Context) {
         notificationManager.notify(1, createTimerNotification(seconds))
     }
 
+    fun createMonitoringNotification(): Notification {
+        return buildBaseNotification(
+            title = "OTP Monitor",
+            text = "Monitoring transport activity",
+            channelId = "transport_monitor_channel",
+            importance = NotificationManager.IMPORTANCE_LOW,
+            isOngoing = true
+        ).build()
+    }
+
     fun sendTripFinishedNotification() {
         val notification = buildBaseNotification(
             title = context.getString(R.string.notif_trip_finished_title),

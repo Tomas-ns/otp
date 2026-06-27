@@ -1,12 +1,22 @@
 package pt.isel.map
 
+import android.R.attr.text
 import android.preference.PreferenceManager
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import pt.isel.transportdetector.TransportDetector
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import org.osmdroid.config.Configuration
@@ -21,6 +31,7 @@ import androidx.core.graphics.drawable.toDrawable
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.infowindow.InfoWindow
+import androidx.compose.material3.Text
 
 @Composable
 fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
@@ -28,6 +39,11 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
 
     val selectedStation by viewModel.selectedStation.collectAsState()
     val snippetPredict = stringResource(id = R.string.marker_snippet_predict)
+
+    val transportDetector = TransportDetector.getInstance()
+    val transportState by transportDetector.state.collectAsState()
+    val currentActivity by transportDetector.currentActivity.collectAsState()
+    val isInsideGeofence by transportDetector.isInsideGeofence.collectAsState()
 
     LaunchedEffect(Unit) {
         Configuration.getInstance().load(
@@ -38,11 +54,11 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
     }
 
     val darkThemeSource = XYTileSource(
-        "Light2", // Nome interno
-        0, // Zoom mínimo
-        20, // Zoom máximo
-        256, // Tamanho do tile
-        ".png", // Formato da imagem
+        "Light2",
+        0,
+        20,
+        256,
+        ".png",
         arrayOf(
             "https://a.basemaps.cartocdn.com/light_all/",
             "https://b.basemaps.cartocdn.com/light_all/",
@@ -51,10 +67,9 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
         "© OpenStreetMap contributors, © CARTO"
     )
 
-
-    // 3. Criar o mapa com AndroidView
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
+    Box(modifier = Modifier.fillMaxSize()) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
             MapView(ctx).apply {
                 setTileSource(darkThemeSource)
@@ -135,12 +150,17 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
                     overlays.add(marker)
                 }
             }
-        }
-    )
-//    if (selectedStation != null) {
-//        StationDetailsBottomSheet(
-//            station = selectedStation!!,
-//            onDismiss = { viewModel.clearSelection() } // Fecha o menu
-//        )
-//}
+        })
+
+        Text(
+            text = "State: $transportState | $currentActivity | Geofence: $isInsideGeofence",
+            color = Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .background(Color.Black.copy(alpha = 0.6f))
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+
+    }
 }
