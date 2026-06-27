@@ -1,5 +1,6 @@
 package pt.isel.planTrip
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -37,9 +38,10 @@ fun PlanTripScreen(viewModel: PlanTripViewModel) {
 
     val currentStations = when (selectedType) {
         typeMetro -> metroStations.map { it.name }.sorted()
-        //typeTrain -> trainStations.map { it.name }.sorted()
         else -> emptyList()
     }
+
+    //typeTrain -> trainStations.map { it.name }.sorted()
 
     var showTimePicker by remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState(initialHour = 18, initialMinute = 0)
@@ -183,7 +185,12 @@ fun PlanTripScreen(viewModel: PlanTripViewModel) {
                         val extraHour = if (roundedMinute == 0 && minute > 45) 1 else 0
                         val finalHour = (timePickerState.hour + extraHour) % 24
 
-                        val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", finalHour, roundedMinute)
+                        val formattedTime = String.format(
+                            Locale.getDefault(),
+                            "%02d:%02d",
+                            finalHour,
+                            roundedMinute
+                        )
 
                         viewModel.updateHour(formattedTime)
                         showTimePicker = false
@@ -254,12 +261,33 @@ fun PlanTripScreen(viewModel: PlanTripViewModel) {
 
         Spacer(modifier = Modifier.weight(1f))
 
+        val occupancyResult by viewModel.occupancyResult.collectAsState()
+
         Button(
-            onClick = { viewModel.checkOccupancyPrediction() },
+            onClick = {
+                Log.d("API_DEBUG", "--- A tentar ligar ao servidor ---")
+                viewModel.checkOccupancyPrediction() },
             modifier = Modifier.fillMaxWidth(),
             enabled = selectedType.isNotEmpty() && selectedStation.isNotEmpty() && selectedHour.isNotEmpty() && selectedDate.isNotEmpty()
         ) {
             Text(stringResource(id = R.string.btn_verify_occupancy))
+        }
+
+        occupancyResult?.let { result ->
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(
+                    text = result,
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

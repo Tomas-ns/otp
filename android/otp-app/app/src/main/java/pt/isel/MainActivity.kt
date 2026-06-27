@@ -97,7 +97,13 @@
                 }
             }
 
-            val planTripViewModel: PlanTripViewModel by viewModels()
+            val planTripViewModel: PlanTripViewModel by viewModels(){
+                object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return PlanTripViewModel(apiAccess) as T
+                    }
+                }
+            }
 
             val mapViewModel: MapViewModel by viewModels {
                 object : ViewModelProvider.Factory {

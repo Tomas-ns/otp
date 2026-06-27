@@ -49,11 +49,10 @@ class ApiAccess {
         }
     }
 
-    suspend fun fetchStationOccupancy(stationId: String): Int {
+    suspend fun fetchStationOccupancy(stationId: String, time : Long): Int {
         getValidToken()
-        val currentTimestamp = System.currentTimeMillis()
         val response = client.get("$baseUrl/api/v1/occupancy/stations/$stationId") {
-            parameter("timestamp", currentTimestamp)
+            parameter("timestamp", time)
             header("Authorization", "Bearer $cachedToken")
         }
         return response.body<StationOccupancyResponse>().occupancyLevel
