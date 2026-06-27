@@ -73,6 +73,63 @@ val metroStations = listOf(
     Station("Aeroporto", "aeroporto_metro", TransportType.METRO, GeoPoint(38.7686, -9.1283))
 )
 
+
+
+val trainStations = listOf(
+    Station("Cruz Quebrada", "cruz_quebrada_train", TransportType.TRAIN, GeoPoint(38.7061, -9.2435)),
+    Station("Moscavide", "moscavide_train", TransportType.TRAIN, GeoPoint(38.7770, -9.1023)),
+    Station("São João do Estoril", "sao_joao_estoril_train", TransportType.TRAIN, GeoPoint(38.7027, -9.3789)),
+    Station("São Pedro do Estoril", "sao_pedro_estoril_train", TransportType.TRAIN, GeoPoint(38.7032, -9.3670)),
+    Station("Oeiras", "oeiras_train", TransportType.TRAIN, GeoPoint(38.6946, -9.3134)),
+    Station("Belém", "belem_train", TransportType.TRAIN, GeoPoint(38.6957, -9.2067)),
+    Station("Oriente", "oriente_train", TransportType.TRAIN, GeoPoint(38.7675, -9.0995)),
+    Station("Sete Rios", "sete_rios_train", TransportType.TRAIN, GeoPoint(38.7397, -9.1665)),
+    Station("Campolide A", "campolide_a_train", TransportType.TRAIN, GeoPoint(38.7323, -9.1632)),
+    Station("Sacavém", "sacavem_train", TransportType.TRAIN, GeoPoint(38.7836, -9.1028)),
+    Station("Marvila", "marvila_train", TransportType.TRAIN, GeoPoint(38.7455, -9.1042)),
+    Station("Braço de Prata", "braco_de_prata_train", TransportType.TRAIN, GeoPoint(38.7490, -9.1033)),
+    Station("Cais do Sodré", "cais_do_sodre_train", TransportType.TRAIN, GeoPoint(38.7061, -9.1462)),
+    Station("Alcântara Mar", "alcantara_mar_train", TransportType.TRAIN, GeoPoint(38.7039, -9.1779)),
+    Station("Algés", "alges_train", TransportType.TRAIN, GeoPoint(38.6993, -9.2272)),
+    Station("Carcavelos", "carcavelos_train", TransportType.TRAIN, GeoPoint(38.6830, -9.3323)),
+    Station("Estoril", "estoril_train", TransportType.TRAIN, GeoPoint(38.7037, -9.3986)),
+    Station("Cascais", "cascais_train", TransportType.TRAIN, GeoPoint(38.6974, -9.4215)),
+    Station("Alcântara Terra", "alcantara_terra_train", TransportType.TRAIN, GeoPoint(38.7154, -9.1764)),
+    Station("Entrecampos", "entrecampos_train", TransportType.TRAIN, GeoPoint(38.7486, -9.1498)),
+    Station("Roma Areeiro", "roma_areeiro_train", TransportType.TRAIN, GeoPoint(38.7481, -9.1352)),
+    Station("Santa Apolónia", "santa_apolonia_train", TransportType.TRAIN, GeoPoint(38.7126, -9.1232)),
+    Station("Rossio", "rossio_train", TransportType.TRAIN, GeoPoint(38.7145, -9.1408)),
+    Station("Campolide", "campolide_train", TransportType.TRAIN, GeoPoint(38.7303, -9.1625)),
+    Station("Bobadela", "bobadela_train", TransportType.TRAIN, GeoPoint(38.8028, -9.0886)),
+    Station("Caxias", "caxias_train", TransportType.TRAIN, GeoPoint(38.6953, -9.2748)),
+    Station("Paço de Arcos", "paco_de_arcos_train", TransportType.TRAIN, GeoPoint(38.6917, -9.2942)),
+    Station("Santo Amaro", "santo_amaro_train", TransportType.TRAIN, GeoPoint(38.6958, -9.3032)),
+    Station("Parede", "parede_train", TransportType.TRAIN, GeoPoint(38.6934, -9.3524)),
+    Station("Monte Estoril", "monte_estoril_train", TransportType.TRAIN, GeoPoint(38.7034, -9.4087)),
+    Station("Pragal", "pragal_train", TransportType.TRAIN, GeoPoint(38.6750, -9.1718)),
+    Station("Corroios", "corroios_train", TransportType.TRAIN, GeoPoint(38.6369, -9.1633)),
+    Station("Sintra", "sintra_train", TransportType.TRAIN, GeoPoint(38.7981, -9.3855)),
+    Station("Portela de Sintra", "portela_de_sintra_train", TransportType.TRAIN, GeoPoint(38.7937, -9.3783)),
+    Station("Reboleira", "reboleira_train", TransportType.TRAIN, GeoPoint(38.7516, -9.2238)),
+    Station("Rio de Mouro", "rio_de_mouro_train", TransportType.TRAIN, GeoPoint(38.7712, -9.3175)),
+    Station("Mercês", "merces_train", TransportType.TRAIN, GeoPoint(38.7661, -9.3271)),
+    Station("Santos", "santos_train", TransportType.TRAIN, GeoPoint(38.7065, -9.1554)),
+    Station("Benfica", "benfica_train", TransportType.TRAIN, GeoPoint(38.7495, -9.1866)),
+    Station("Santa Cruz Damaia", "santa_cruz_damaia_train", TransportType.TRAIN, GeoPoint(38.7505, -9.2133)),
+    Station("Amadora", "amadora_train", TransportType.TRAIN, GeoPoint(38.7565, -9.2325)),
+    Station("Monte Abraão", "monte_abraao_train", TransportType.TRAIN, GeoPoint(38.7584, -9.2612)),
+    Station("Algueirão Mem Martins", "algueirao_mem_martins_train", TransportType.TRAIN, GeoPoint(38.7758, -9.3444)),
+    Station("Agualva Cacém", "agualva_cacem_train", TransportType.TRAIN, GeoPoint(38.7645, -9.2937))
+)
+
+
+
+
+
+
+
+
+
 /*
 val trainStations = listOf(
 // === LINHA DE CASCAIS ===

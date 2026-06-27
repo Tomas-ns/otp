@@ -12,6 +12,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.serialization.gson.gson
 import pt.isel.domain.AuthResponse
+import pt.isel.domain.OccupancyMapResponse
 
 data class OccupancyResponse(
     val station: String,
@@ -56,5 +57,15 @@ class ApiAccess {
             header("Authorization", "Bearer $cachedToken")
         }
         return response.body<StationOccupancyResponse>().occupancyLevel
+    }
+
+    suspend fun fetchCompletePrediction() : OccupancyMapResponse{
+        getValidToken()
+        Log.e("API_DEBUG", "Antes de ver previsoes")
+        val response = client.get("$baseUrl/api/v1/occupancy/map") {
+            header("Authorization", "Bearer $cachedToken")
+        }
+        Log.e("API_DEBUG", "Depois de ver previsoes $response")
+        return response.body<OccupancyMapResponse>()
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pt.isel.R
 import pt.isel.domain.metroStations
+import pt.isel.domain.trainStations
 //import pt.isel.map.trainStations
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,10 +39,10 @@ fun PlanTripScreen(viewModel: PlanTripViewModel) {
 
     val currentStations = when (selectedType) {
         typeMetro -> metroStations.map { it.name }.sorted()
+        typeTrain -> trainStations.map { it.name }.sorted()
         else -> emptyList()
     }
 
-    //typeTrain -> trainStations.map { it.name }.sorted()
 
     var showTimePicker by remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState(initialHour = 18, initialMinute = 0)
@@ -265,7 +266,7 @@ fun PlanTripScreen(viewModel: PlanTripViewModel) {
 
         Button(
             onClick = {
-                Log.d("API_DEBUG", "--- A tentar ligar ao servidor ---")
+                Log.d("API_DEBUG", "Prever ocpuacao")
                 viewModel.checkOccupancyPrediction() },
             modifier = Modifier.fillMaxWidth(),
             enabled = selectedType.isNotEmpty() && selectedStation.isNotEmpty() && selectedHour.isNotEmpty() && selectedDate.isNotEmpty()

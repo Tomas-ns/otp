@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pt.isel.api.ApiAccess
 import pt.isel.domain.metroStations
+import pt.isel.domain.trainStations
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -34,6 +35,10 @@ class PlanTripViewModel(private val api: ApiAccess) : ViewModel() {
     fun updateType(type: String) {
         _selectedType.value = type
         _selectedStation.value = ""
+
+        _selectedHour.value = ""
+        _selectedDate.value = ""
+        _occupancyResult.value = null
     }
 
     fun updateStation(station: String) {
@@ -49,12 +54,19 @@ class PlanTripViewModel(private val api: ApiAccess) : ViewModel() {
     }
 
     fun checkOccupancyPrediction() {
-        val type = _selectedType.value
+        val type = _selectedType.value.toUpperCase()
         val station = _selectedStation.value
         val hour = _selectedHour.value
         val date = _selectedDate.value
 
-        val stationId = metroStations.find { it.name == station }!!.stationId
+        Log.d("API_DEBUG", "$type, $station, $hour, $date")
+        val stationId =
+            if (type == "METRO")
+                metroStations.find { it.name == station }!!.stationId
+            else
+                trainStations.find { it.name == station }!!.stationId
+        Log.d("API_DEBUG", "meter vals")
+
 
         viewModelScope.launch {
             try {

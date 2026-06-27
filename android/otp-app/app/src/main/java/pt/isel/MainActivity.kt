@@ -73,8 +73,6 @@
             val apiAccess = ApiAccess()
             val settingsRepository = (application as OTPCDApplication).settingsRepository
 
-
-
             lifecycleScope.launch {
                 settingsRepository.createUserId()
             }
@@ -112,8 +110,6 @@
                     }
                 }
             }
-
-
 
             val permissionsToRequest = mutableListOf<String>()
 
@@ -167,7 +163,10 @@
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
 
-        // 2. O componente principal passa a ser o Menu Lateral (Drawer)
+        LaunchedEffect(Unit) {
+            mapViewModel.startPeriodicFetch()
+        }
+
         ModalNavigationDrawer(
             drawerState = drawerState,
             gesturesEnabled = drawerState.isOpen,
@@ -191,7 +190,6 @@
                             selected = destination == currentDestination,
                             onClick = {
                                 currentDestination = destination
-                                // Fecha o menu automaticamente depois de clicar!
                                 scope.launch { drawerState.close() }
                             },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

@@ -3,9 +3,11 @@ package pt.isel.map
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import pt.isel.api.ApiAccess
 import pt.isel.domain.Station
@@ -41,5 +43,16 @@ class MapViewModel(private val api: ApiAccess) : ViewModel() {
 
     fun clearSelection() {
         _selectedStation.value = null
+    }
+
+    fun startPeriodicFetch(){
+        viewModelScope.launch {
+            while (isActive) {
+                val predictions = api.fetchCompletePrediction()
+                Log.e("API_DEBUG", "Predictions ${predictions.stations}")
+
+                delay(5 * 60 * 1000L)
+            }
+        }
     }
 }

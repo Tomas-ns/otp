@@ -25,6 +25,7 @@ import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import pt.isel.domain.metroStations
+import pt.isel.domain.trainStations
 
 @Composable
 fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
@@ -46,7 +47,7 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
         0,
         20,
         256,
-        ".png", // Formato da imagem
+        ".png",
         arrayOf(
             "https://a.basemaps.cartocdn.com/light_all/",
             "https://b.basemaps.cartocdn.com/light_all/",
@@ -134,19 +135,35 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
                 }
                 val trainDrawable = ContextCompat.getDrawable(context, R.drawable.ic_trainn)
                 val trainIcon = trainDrawable?.toBitmap(40, 40)?.toDrawable(context.resources)
-/*
+
                 trainStations.forEach { station ->
                     val marker = Marker(this)
                     marker.position = station.location
                     marker.title = station.name
                     marker.snippet = snippetPredict
-
                     marker.icon = trainIcon
+
+                    marker.setOnMarkerClickListener { clickedMarker, _ ->
+                        viewModel.selectStation(station)
+
+                        clickedMarker.snippet = "A carregar..."
+                        clickedMarker.showInfoWindow()
+
+                        CoroutineScope(Dispatchers.Main).launch {
+                            viewModel.occupancyResult.collect { result ->
+                                clickedMarker.snippet = result
+                                if (clickedMarker.isInfoWindowShown) {
+                                    clickedMarker.showInfoWindow()
+                                }
+                            }
+                        }
+                        true
+                    }
 
                     overlays.add(marker)
                 }
 
- */
+
             }
         }
     )
