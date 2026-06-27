@@ -18,14 +18,10 @@ class OccupancyMapServiceImpl(
             .findLatestByType(PredictionType.COMPLETE)
             .associateBy { it.station.id }
 
-        val limitedByStation = predictionRepository
-            .findLatestByType(PredictionType.LIMITED)
-            .associateBy { it.station.id }
-
         val stations = stationRepository.findAll()
 
         val stationResponses = stations.map { station ->
-            val prediction = completeMap[station.id] ?: limitedByStation[station.id]
+            val prediction = completeMap[station.id]
             StationOccupancyResponse(
                 stationId = station.id,
                 name = station.name,
@@ -33,7 +29,7 @@ class OccupancyMapServiceImpl(
                 longitude = station.longitude,
                 transportType = station.transportType,
                 occupancyLevel = prediction?.occupancyLevel?.toInt() ?: 1,
-                predictionType = prediction?.type ?: PredictionType.LIMITED,
+                predictionType = prediction?.type ?: PredictionType.COMPLETE,
             )
         }
 
