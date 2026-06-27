@@ -1,0 +1,125 @@
+package pt.isel.repository
+
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
+import pt.isel.datascan.domain.ScanReading
+import pt.isel.datascan.domain.TripData
+import pt.isel.datascan.viewmodel.state.IS_TEST_TRIP
+
+class FirestoreRepository(
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance("otp-cd-db"),
+    private val authRepository: AuthRepository = AuthRepository()
+) {
+    var isTest: Boolean = IS_TEST_TRIP
+
+    private val collectionName: String
+        get() = if (isTest) "viagens_teste" else "viagens"
+
+    fun createTrip(
+        tripId: String,
+        trip : TripData,
+        onSuccess: () -> Unit = {},
+        onFailure: (Exception) -> Unit = {}
+    ) {
+        authRepository.ensureAuth(
+            onSuccess = {
+                db.collection(collectionName)
+                    .document(tripId)
+                    .set(trip.toMap())
+                    .addOnSuccessListener {
+                        Log.d("FirestoreRepository", "Trip $tripId created successfully")
+                        onSuccess()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirestoreRepository", "Error creating trip $tripId", e)
+                        onFailure(e)
+                    }
+            },
+            onFailure = onFailure
+        )
+    }
+
+    fun addReading(
+        tripId: String,
+        reading: ScanReading,
+        onSuccess: () -> Unit = {},
+        onFailure: (Exception) -> Unit = {}
+    ) {
+        authRepository.ensureAuth(
+            onSuccess = {
+                db.collection(collectionName)
+                    .document(tripId)
+                    .collection("leituras")
+                    .add(reading.toMap())
+                    .addOnSuccessListener { ref ->
+                        Log.d("FirestoreRepository", "Reading added with ID: ${ref.id}")
+                        onSuccess()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirestoreRepository", "Error adding reading to trip $tripId", e)
+                        onFailure(e)
+                    }
+            },
+            onFailure = onFailure
+        )
+    }
+
+    fun deleteTrip(
+        tripId: String,
+        onSuccess: () -> Unit = {},
+        onFailure: (Exception) -> Unit = {}
+    ) {
+        authRepository.ensureAuth(
+            onSuccess = {
+                val tripRef = db.collection(collectionName).document(tripId)
+
+                tripRef.collection("leituras").get()
+                    .addOnSuccessListener { snapshot ->
+                        val batch = db.batch()
+                        for (doc in snapshot.documents) {
+                            batch.delete(doc.reference)
+                        }
+
+                        batch.delete(tripRef)
+
+                        batch.commit()
+                            .addOnSuccessListener {
+                                Log.d("FirestoreRepository", "Trip $tripId and all readings deleted")
+                                onSuccess()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("FirestoreRepository", "Error committing batch delete for $tripId", e)
+                                onFailure(e)
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirestoreRepository", "Error fetching readings for deletion", e)
+                        onFailure(e)
+                    }
+            },
+            onFailure = onFailure
+        )
+    }
+
+    fun invalidateTrip(
+        tripId: String,
+        onSuccess: () -> Unit = {},
+        onFailure: (Exception) -> Unit = {}
+    ) {
+        authRepository.ensureAuth(
+            onSuccess = {
+                db.collection(collectionName).document(tripId)
+                    .update("isTripValid", false)
+                    .addOnSuccessListener {
+                        Log.d("FirestoreRepository", "Trip $tripId marked as invalid")
+                        onSuccess()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirestoreRepository", "Error invalidating trip $tripId", e)
+                        onFailure(e)
+                    }
+            },
+            onFailure = onFailure
+        )
+    }
+}
