@@ -25,7 +25,8 @@ class MapViewModel(private val api: ApiAccess) : ViewModel() {
         viewModelScope.launch {
             Log.d("API_DEBUG", "--- A tentar ligar ao servidor ---")
             try {
-                val occupancy = api.fetchStationOccupancy(station.stationId)
+                val time = System.currentTimeMillis()
+                val occupancy = api.fetchStationOccupancy(station.stationId, time)
 
                 Log.d("API_DEBUG", "Sucesso! Resposta bruta: $occupancy")
                 _occupancyResult.value = "Lotação: $occupancy"
