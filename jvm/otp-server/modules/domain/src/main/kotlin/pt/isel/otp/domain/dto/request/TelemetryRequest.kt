@@ -18,13 +18,13 @@ data class TelemetryRequest(
     @field:PositiveOrZero
     val bluetoothCount: Int,
     @field:NotNull
-    @field:Size(min = 5, max = 5)
+    @field:Size(min = 0, max = 5)
     val bluetoothSignals: List<Int>,
     @field:NotNull
     @field:PositiveOrZero
     val wifiCount: Int,
     @field:NotNull
-    @field:Size(min = 5, max = 5)
+    @field:Size(min = 0, max = 5)
     val wifiSignals: List<Int>,
     @field:NotNull
     val rsrp: Int,
