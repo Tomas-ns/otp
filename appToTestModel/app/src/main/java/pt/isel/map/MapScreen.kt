@@ -18,6 +18,9 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.TilesOverlay
 import pt.isel.R
 import androidx.core.graphics.drawable.toDrawable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.infowindow.InfoWindow
@@ -38,10 +41,10 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
     }
 
     val darkThemeSource = XYTileSource(
-        "Light2", // Nome interno
-        0, // Zoom mínimo
-        20, // Zoom máximo
-        256, // Tamanho do tile
+        "Light2",
+        0,
+        20,
+        256,
         ".png", // Formato da imagem
         arrayOf(
             "https://a.basemaps.cartocdn.com/light_all/",
@@ -52,7 +55,6 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
     )
 
 
-    // 3. Criar o mapa com AndroidView
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
@@ -108,22 +110,30 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
                     marker.position = station.location
                     marker.title = station.name
                     marker.snippet = snippetPredict
-
                     marker.icon = metroIcon
 
-                    marker.setOnMarkerClickListener { _, _ ->
+                    marker.setOnMarkerClickListener { clickedMarker, _ ->
                         viewModel.selectStation(station)
 
-                        marker.showInfoWindow()
+                        clickedMarker.snippet = "A carregar..."
+                        clickedMarker.showInfoWindow()
+
+                        CoroutineScope(Dispatchers.Main).launch {
+                            viewModel.occupancyResult.collect { result ->
+                                clickedMarker.snippet = result
+                                if (clickedMarker.isInfoWindowShown) {
+                                    clickedMarker.showInfoWindow()
+                                }
+                            }
+                        }
                         true
                     }
 
                     overlays.add(marker)
                 }
-
                 val trainDrawable = ContextCompat.getDrawable(context, R.drawable.ic_trainn)
                 val trainIcon = trainDrawable?.toBitmap(40, 40)?.toDrawable(context.resources)
-
+/*
                 trainStations.forEach { station ->
                     val marker = Marker(this)
                     marker.position = station.location
@@ -134,6 +144,8 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
 
                     overlays.add(marker)
                 }
+
+ */
             }
         }
     )

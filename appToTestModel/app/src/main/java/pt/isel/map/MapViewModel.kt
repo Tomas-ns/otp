@@ -24,10 +24,10 @@ class MapViewModel(private val api: ApiAccess) : ViewModel() {
         viewModelScope.launch {
             Log.d("API_DEBUG", "--- A tentar ligar ao servidor ---")
             try {
-                val jsonResponse = api.fetchStationOccupancy(station.name)
+                val occupancy = api.fetchStationOccupancy(station.stationId)
 
-                Log.d("API_DEBUG", "Sucesso! Resposta bruta: $jsonResponse")
-                _occupancyResult.value = "Lotação: $jsonResponse"
+                Log.d("API_DEBUG", "Sucesso! Resposta bruta: $occupancy")
+                _occupancyResult.value = "Lotação: $occupancy"
 
             } catch (e: Exception) {
                 Log.e("API_DEBUG", "Erro capturado: ${e.message}")

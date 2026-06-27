@@ -8,70 +8,72 @@ enum class TransportType {
 
 data class Station(
     val name: String,
+    val stationId : String,
     val type: TransportType,
     val location: GeoPoint
 )
 
 val metroStations = listOf(
-    Station("Reboleira", TransportType.METRO, GeoPoint(38.7522, -9.2241)),
-    Station("Amadora Este", TransportType.METRO, GeoPoint(38.7587, -9.2179)),
-    Station("Alfornelos", TransportType.METRO, GeoPoint(38.7603, -9.2045)),
-    Station("Pontinha", TransportType.METRO, GeoPoint(38.7622, -9.1969)),
-    Station("Carnide", TransportType.METRO, GeoPoint(38.7590, -9.1928)),
-    Station("Colégio Militar/Luz", TransportType.METRO, GeoPoint(38.7537, -9.1899)),
-    Station("Alto dos Moinhos", TransportType.METRO, GeoPoint(38.7475, -9.1800)),
-    Station("Laranjeiras", TransportType.METRO, GeoPoint(38.7485, -9.1725)),
-    Station("Jardim Zoológico", TransportType.METRO, GeoPoint(38.7412, -9.1664)),
-    Station("Praça de Espanha", TransportType.METRO, GeoPoint(38.7377, -9.1593)),
-    Station("São Sebastião", TransportType.METRO, GeoPoint(38.7340, -9.1536)),
-    Station("Parque", TransportType.METRO, GeoPoint(38.7291, -9.1501)),
-    Station("Marquês de Pombal", TransportType.METRO, GeoPoint(38.7259, -9.1500)),
-    Station("Avenida", TransportType.METRO, GeoPoint(38.7193, -9.1451)),
-    Station("Restauradores", TransportType.METRO, GeoPoint(38.7155, -9.1415)),
-    Station("Baixa-Chiado", TransportType.METRO, GeoPoint(38.7104, -9.1402)),
-    Station("Terreiro do Paço", TransportType.METRO, GeoPoint(38.7072, -9.1328)),
-    Station("Santa Apolónia", TransportType.METRO, GeoPoint(38.7138, -9.1225)),
+    // === LINHA AZUL ===
+    Station("Reboleira", "reboleira_metro", TransportType.METRO, GeoPoint(38.7522, -9.2241)),
+    Station("Amadora Este", "amadora_este_metro", TransportType.METRO, GeoPoint(38.7587, -9.2179)),
+    Station("Alfornelos", "alfornelos_metro", TransportType.METRO, GeoPoint(38.7603, -9.2045)),
+    Station("Pontinha", "pontinha_metro", TransportType.METRO, GeoPoint(38.7622, -9.1969)),
+    Station("Carnide", "carnide_metro", TransportType.METRO, GeoPoint(38.7590, -9.1928)),
+    Station("Colégio Militar/Luz", "colegio_militar_metro", TransportType.METRO, GeoPoint(38.7537, -9.1899)),
+    Station("Alto dos Moinhos", "alto_dos_moinhos_metro", TransportType.METRO, GeoPoint(38.7475, -9.1800)),
+    Station("Laranjeiras", "laranjeiras_metro", TransportType.METRO, GeoPoint(38.7485, -9.1725)),
+    Station("Jardim Zoológico", "jardim_zoologico_metro", TransportType.METRO, GeoPoint(38.7412, -9.1664)),
+    Station("Praça de Espanha", "praca_de_espanha_metro", TransportType.METRO, GeoPoint(38.7377, -9.1593)),
+    Station("São Sebastião", "sao_sebastiao_metro", TransportType.METRO, GeoPoint(38.7340, -9.1536)),
+    Station("Parque", "parque_metro", TransportType.METRO, GeoPoint(38.7291, -9.1501)),
+    Station("Marquês de Pombal", "marques_de_pombal_metro", TransportType.METRO, GeoPoint(38.7259, -9.1500)),
+    Station("Avenida", "avenida_metro", TransportType.METRO, GeoPoint(38.7193, -9.1451)),
+    Station("Restauradores", "restauradores_metro", TransportType.METRO, GeoPoint(38.7155, -9.1415)),
+    Station("Baixa-Chiado", "baixa_chiado_metro", TransportType.METRO, GeoPoint(38.7104, -9.1402)),
+    Station("Terreiro do Paço", "terreiro_do_paco_metro", TransportType.METRO, GeoPoint(38.7072, -9.1328)),
+    Station("Santa Apolónia", "santa_apolonia_metro", TransportType.METRO, GeoPoint(38.7138, -9.1225)),
 
     // === LINHA AMARELA ===
-    Station("Odivelas", TransportType.METRO, GeoPoint(38.7934, -9.1734)),
-    Station("Senhor Roubado", TransportType.METRO, GeoPoint(38.7857, -9.1718)),
-    Station("Ameixoeira", TransportType.METRO, GeoPoint(38.7795, -9.1596)),
-    Station("Lumiar", TransportType.METRO, GeoPoint(38.7733, -9.1593)),
-    Station("Quinta das Conchas", TransportType.METRO, GeoPoint(38.7675, -9.1555)),
-    Station("Campo Grande", TransportType.METRO, GeoPoint(38.7602, -9.1578)),
-    Station("Cidade Universitária", TransportType.METRO, GeoPoint(38.7514, -9.1593)),
-    Station("Entre Campos", TransportType.METRO, GeoPoint(38.7469, -9.1482)),
-    Station("Campo Pequeno", TransportType.METRO, GeoPoint(38.7408, -9.1467)),
-    Station("Saldanha", TransportType.METRO, GeoPoint(38.7348, -9.1453)),
-    Station("Picoas", TransportType.METRO, GeoPoint(38.7302, -9.1469)),
-    Station("Rato", TransportType.METRO, GeoPoint(38.7201, -9.1548)),
+    Station("Odivelas", "odivelas_metro", TransportType.METRO, GeoPoint(38.7934, -9.1734)),
+    Station("Senhor Roubado", "senhor_roubado_metro", TransportType.METRO, GeoPoint(38.7857, -9.1718)),
+    Station("Ameixoeira", "ameixoeira_metro", TransportType.METRO, GeoPoint(38.7795, -9.1596)),
+    Station("Lumiar", "lumiar_metro", TransportType.METRO, GeoPoint(38.7733, -9.1593)),
+    Station("Quinta das Conchas", "quinta_das_conchas_metro", TransportType.METRO, GeoPoint(38.7675, -9.1555)),
+    Station("Campo Grande", "campo_grande_metro", TransportType.METRO, GeoPoint(38.7602, -9.1578)),
+    Station("Cidade Universitária", "cidade_universitaria_metro", TransportType.METRO, GeoPoint(38.7514, -9.1593)),
+    Station("Entre Campos", "entrecampos_metro", TransportType.METRO, GeoPoint(38.7469, -9.1482)),
+    Station("Campo Pequeno", "campo_pequeno_metro", TransportType.METRO, GeoPoint(38.7408, -9.1467)),
+    Station("Saldanha", "saldanha_metro", TransportType.METRO, GeoPoint(38.7348, -9.1453)),
+    Station("Picoas", "picoas_metro", TransportType.METRO, GeoPoint(38.7302, -9.1469)),
+    Station("Rato", "rato_metro", TransportType.METRO, GeoPoint(38.7201, -9.1548)),
 
     // === LINHA VERDE ===
-    Station("Telheiras", TransportType.METRO, GeoPoint(38.7602, -9.1661)),
-    Station("Alvalade", TransportType.METRO, GeoPoint(38.7533, -9.1442)),
-    Station("Roma", TransportType.METRO, GeoPoint(38.7481, -9.1412)),
-    Station("Areeiro", TransportType.METRO, GeoPoint(38.7423, -9.1335)),
-    Station("Alameda", TransportType.METRO, GeoPoint(38.7369, -9.1338)),
-    Station("Arroios", TransportType.METRO, GeoPoint(38.7334, -9.1342)),
-    Station("Anjos", TransportType.METRO, GeoPoint(38.7270, -9.1348)),
-    Station("Intendente", TransportType.METRO, GeoPoint(38.7233, -9.1353)),
-    Station("Martim Moniz", TransportType.METRO, GeoPoint(38.7152, -9.1356)),
-    Station("Rossio", TransportType.METRO, GeoPoint(38.7140, -9.1381)),
-    Station("Cais do Sodré", TransportType.METRO, GeoPoint(38.7061, -9.1451)),
+    Station("Telheiras", "telheiras_metro", TransportType.METRO, GeoPoint(38.7602, -9.1661)),
+    Station("Alvalade", "alvalade_metro", TransportType.METRO, GeoPoint(38.7533, -9.1442)),
+    Station("Roma", "roma_metro", TransportType.METRO, GeoPoint(38.7481, -9.1412)),
+    Station("Areeiro", "areeiro_metro", TransportType.METRO, GeoPoint(38.7423, -9.1335)),
+    Station("Alameda", "alameda_metro", TransportType.METRO, GeoPoint(38.7369, -9.1338)),
+    Station("Arroios", "arroios_metro", TransportType.METRO, GeoPoint(38.7334, -9.1342)),
+    Station("Anjos", "anjos_metro", TransportType.METRO, GeoPoint(38.7270, -9.1348)),
+    Station("Intendente", "intendente_metro", TransportType.METRO, GeoPoint(38.7233, -9.1353)),
+    Station("Martim Moniz", "martim_moniz_metro", TransportType.METRO, GeoPoint(38.7152, -9.1356)),
+    Station("Rossio", "rossio_metro", TransportType.METRO, GeoPoint(38.7140, -9.1381)),
+    Station("Cais do Sodré", "cais_do_sodre_metro", TransportType.METRO, GeoPoint(38.7061, -9.1451)),
 
     // === LINHA VERMELHA ===
-    Station("Olaias", TransportType.METRO, GeoPoint(38.7402, -9.1226)),
-    Station("Bela Vista", TransportType.METRO, GeoPoint(38.7478, -9.1177)),
-    Station("Chelas", TransportType.METRO, GeoPoint(38.7547, -9.1140)),
-    Station("Olivais", TransportType.METRO, GeoPoint(38.7608, -9.1118)),
-    Station("Cabo Ruivo", TransportType.METRO, GeoPoint(38.7629, -9.1051)),
-    Station("Oriente", TransportType.METRO, GeoPoint(38.7678, -9.0993)),
-    Station("Moscavide", TransportType.METRO, GeoPoint(38.7749, -9.1030)),
-    Station("Encarnação", TransportType.METRO, GeoPoint(38.7749, -9.1154)),
-    Station("Aeroporto", TransportType.METRO, GeoPoint(38.7686, -9.1283))
+    Station("Olaias", "olaias_metro", TransportType.METRO, GeoPoint(38.7402, -9.1226)),
+    Station("Bela Vista", "bela_vista_metro", TransportType.METRO, GeoPoint(38.7478, -9.1177)),
+    Station("Chelas", "chelas_metro", TransportType.METRO, GeoPoint(38.7547, -9.1140)),
+    Station("Olivais", "olivais_metro", TransportType.METRO, GeoPoint(38.7608, -9.1118)),
+    Station("Cabo Ruivo", "cabo_ruivo_metro", TransportType.METRO, GeoPoint(38.7629, -9.1051)),
+    Station("Oriente", "oriente_metro", TransportType.METRO, GeoPoint(38.7678, -9.0993)),
+    Station("Moscavide", "moscavide_metro", TransportType.METRO, GeoPoint(38.7749, -9.1030)),
+    Station("Encarnação", "encarnacao_metro", TransportType.METRO, GeoPoint(38.7749, -9.1154)),
+    Station("Aeroporto", "aeroporto_metro", TransportType.METRO, GeoPoint(38.7686, -9.1283))
 )
 
-
+/*
 val trainStations = listOf(
 // === LINHA DE CASCAIS ===
     //Station("Cais do Sodré (CP)", TransportType.TRAIN, GeoPoint(38.7056, -9.1456)),
@@ -130,3 +132,5 @@ val trainStations = listOf(
     Station("Palmela", TransportType.TRAIN, GeoPoint(38.5833, -8.8897)),
     Station("Setúbal", TransportType.TRAIN, GeoPoint(38.5283, -8.8837))
 )
+
+ */

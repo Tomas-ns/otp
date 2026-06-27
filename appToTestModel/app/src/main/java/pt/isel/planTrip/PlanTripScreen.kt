@@ -14,7 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pt.isel.R
 import pt.isel.map.metroStations
-import pt.isel.map.trainStations
+//import pt.isel.map.trainStations
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -37,7 +37,7 @@ fun PlanTripScreen(viewModel: PlanTripViewModel) {
 
     val currentStations = when (selectedType) {
         typeMetro -> metroStations.map { it.name }.sorted()
-        typeTrain -> trainStations.map { it.name }.sorted()
+        //typeTrain -> trainStations.map { it.name }.sorted()
         else -> emptyList()
     }
 
