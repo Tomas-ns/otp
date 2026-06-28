@@ -79,6 +79,7 @@ dependencies {
     implementation("io.ktor:ktor-client-android:2.3.9")
     implementation("io.ktor:ktor-client-content-negotiation:2.3.9")
     implementation("io.ktor:ktor-serialization-gson:2.3.9")
+    implementation("io.ktor:ktor-client-logging:2.3.9")
 
     implementation("org.osmdroid:osmdroid-android:6.1.18")
 

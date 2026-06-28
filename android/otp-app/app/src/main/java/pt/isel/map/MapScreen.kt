@@ -36,8 +36,18 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 import pt.isel.domain.TransportType
 import pt.isel.domain.metroStations
 import pt.isel.domain.trainStations
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
+import pt.isel.transportdetector.TransportDetector
+import pt.isel.transportdetector.TransportState
 
 @Composable
 fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
@@ -45,6 +55,11 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
     val selectedStation by viewModel.selectedStation.collectAsState()
     val predictions by viewModel.currentPredictions.collectAsState()
     val snippetPredict = stringResource(id = R.string.marker_snippet_predict)
+
+    val transportDetector = TransportDetector.getInstance()
+    val transportState by transportDetector.state.collectAsState()
+    val currentActivity by transportDetector.currentActivity.collectAsState()
+    val isInsideGeofence by transportDetector.isInsideGeofence.collectAsState()
 
     LaunchedEffect(Unit) {
         Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context))
@@ -77,9 +92,10 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
         trainBitmap?.toDrawable(context.resources)
     }
 
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { ctx ->
+    Box(modifier = Modifier.fillMaxSize()) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { ctx ->
             MapView(ctx).apply {
                 setTileSource(darkThemeSource)
                 setMultiTouchControls(true)
@@ -178,6 +194,24 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
             mapView.invalidate()
         }
     )
+
+        val geofenceText = when {
+            isInsideGeofence && transportState == TransportState.IN_TRANSIT -> "Em trânsito"
+            isInsideGeofence && transportState == TransportState.AT_STATION -> "Numa estação"
+            isInsideGeofence -> "Dentro de geocerca"
+            else -> "Fora de geocerca"
+        }
+
+        Text(
+            text = "$geofenceText | $currentActivity",
+            color = Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .background(Color.Black.copy(alpha = 0.6f))
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
 }
 
 private fun getOccupancyColor(level: Int): Int {

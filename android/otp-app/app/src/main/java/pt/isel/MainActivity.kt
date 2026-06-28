@@ -124,6 +124,10 @@
                 permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
             }
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                permissionsToRequest.add(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+
             val permissionLauncher = registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
             ) { }
