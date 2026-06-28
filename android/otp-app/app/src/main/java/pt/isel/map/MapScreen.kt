@@ -132,12 +132,21 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
                     clickedMarker.snippet = "A carregar..."
                     clickedMarker.showInfoWindow()
                     CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.occupancyResult.collect { result ->
-                            clickedMarker.snippet = result
+                        if (prediction != null) {
+                            clickedMarker.snippet = "Lotação atual: ${prediction.occupancyLevel}"
                             if (clickedMarker.isInfoWindowShown) {
                                 clickedMarker.showInfoWindow()
                             }
                         }
+                        else{
+                            viewModel.occupancyResult.collect { result ->
+                                clickedMarker.snippet = result
+                                if (clickedMarker.isInfoWindowShown) {
+                                    clickedMarker.showInfoWindow()
+                                }
+                            }
+                        }
+
                     }
                     true
                 }
@@ -164,12 +173,21 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
                     clickedMarker.snippet = "A carregar..."
                     clickedMarker.showInfoWindow()
                     CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.occupancyResult.collect { result ->
-                            clickedMarker.snippet = result
+                        if (prediction != null) {
+                            clickedMarker.snippet = "Lotação atual: ${prediction.occupancyLevel}"
                             if (clickedMarker.isInfoWindowShown) {
                                 clickedMarker.showInfoWindow()
                             }
                         }
+                        else{
+                            viewModel.occupancyResult.collect { result ->
+                                clickedMarker.snippet = result
+                                if (clickedMarker.isInfoWindowShown) {
+                                    clickedMarker.showInfoWindow()
+                                }
+                            }
+                        }
+
                     }
                     true
                 }

@@ -37,7 +37,7 @@ class MapViewModel(private val api: ApiAccess) : ViewModel() {
                 val occupancy = api.fetchStationOccupancy(station.stationId, time)
 
                 Log.d("API_DEBUG", "Sucesso! Resposta bruta: $occupancy")
-                _occupancyResult.value = "Lotação: $occupancy"
+                _occupancyResult.value = "Lotação prevista: $occupancy"
 
             } catch (e: Exception) {
                 Log.e("API_DEBUG", "Erro capturado: ${e.message}")
