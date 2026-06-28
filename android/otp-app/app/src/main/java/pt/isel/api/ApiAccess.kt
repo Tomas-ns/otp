@@ -1,7 +1,6 @@
 package pt.isel.api
 
 import android.util.Log
-import pt.isel.domain.StationOccupancyResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -13,20 +12,21 @@ import io.ktor.client.request.post
 import io.ktor.serialization.gson.gson
 import pt.isel.domain.AuthResponse
 import pt.isel.domain.OccupancyMapResponse
+import pt.isel.domain.StationOccupancyResponse
 
 data class OccupancyResponse(
     val station: String,
     val occupancyLevel: String
 )
 
-class ApiAccess {
+class ApiAccess(
+    internal val httpClient: HttpClient = HttpClient(Android) {
+        install(ContentNegotiation) { gson() }
+    }
+) {
     private var cachedToken: String? = null
     private var expiryTime: Long = 0
     private val baseUrl = "http://34.76.146.40:8080"
-
-    private val client = HttpClient(Android) {
-        install(ContentNegotiation) { gson() }
-    }
 
     private suspend fun getValidToken(): String {
         val isExpired = System.currentTimeMillis() >= (expiryTime - 60000)
@@ -43,7 +43,7 @@ class ApiAccess {
 
     suspend fun fetchNewTokenFromServer(): AuthResponse {
         return try {
-            client.post("$baseUrl/api/v1/auth/token").body()
+            httpClient.post("$baseUrl/api/v1/auth/token").body()
         } catch (e: Exception) {
             Log.e("API_DEBUG", "Falha ao renovar token: ${e.message}")
             throw e
@@ -52,7 +52,7 @@ class ApiAccess {
 
     suspend fun fetchStationOccupancy(stationId: String, time : Long): Int {
         getValidToken()
-        val response = client.get("$baseUrl/api/v1/occupancy/stations/$stationId") {
+        val response = httpClient.get("$baseUrl/api/v1/occupancy/stations/$stationId") {
             parameter("timestamp", time)
             header("Authorization", "Bearer $cachedToken")
         }
@@ -62,7 +62,7 @@ class ApiAccess {
     suspend fun fetchCompletePrediction() : OccupancyMapResponse{
         getValidToken()
         Log.e("API_DEBUG", "Antes de ver previsoes")
-        val response = client.get("$baseUrl/api/v1/occupancy/map") {
+        val response = httpClient.get("$baseUrl/api/v1/occupancy/map") {
             header("Authorization", "Bearer $cachedToken")
         }
         Log.e("API_DEBUG", "Depois de ver previsoes $response")

@@ -14,24 +14,23 @@ class OccupancyMapServiceImpl(
     private val stationRepository: StationRepository,
 ) : OccupancyMapService {
     override fun getOccupancyMap(): OccupancyMapResponse {
-        val completeMap = predictionRepository
-            .findLatestByType(PredictionType.COMPLETE)
-            .associateBy { it.station.id }
-
         val stations = stationRepository.findAll()
+            .associateBy { it.id }
 
-        val stationResponses = stations.map { station ->
-            val prediction = completeMap[station.id]
-            StationOccupancyResponse(
-                stationId = station.id,
-                name = station.name,
-                latitude = station.latitude,
-                longitude = station.longitude,
-                transportType = station.transportType,
-                occupancyLevel = prediction?.occupancyLevel?.toInt() ?: 1,
-                predictionType = prediction?.type ?: PredictionType.COMPLETE,
-            )
-        }
+        val stationResponses = predictionRepository
+            .findLatestByType(PredictionType.COMPLETE)
+            .mapNotNull { prediction ->
+                val station = stations[prediction.station.id] ?: return@mapNotNull null
+                StationOccupancyResponse(
+                    stationId = station.id,
+                    name = station.name,
+                    latitude = station.latitude,
+                    longitude = station.longitude,
+                    transportType = station.transportType,
+                    occupancyLevel = prediction.occupancyLevel.toInt(),
+                    predictionType = prediction.type,
+                )
+            }
 
         return OccupancyMapResponse(stations = stationResponses)
     }
