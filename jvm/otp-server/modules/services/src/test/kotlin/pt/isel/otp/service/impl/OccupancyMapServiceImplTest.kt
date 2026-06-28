@@ -31,51 +31,43 @@ class OccupancyMapServiceImplTest {
     }
 
     @Test
-    fun `getOccupancyMap returns COMPLETE predictions when available`() {
+    fun `getOccupancyMap returns only stations with COMPLETE predictions`() {
         `when`(stationRepository.findAll()).thenReturn(listOf(s1, s2))
         `when`(predictionRepository.findLatestByType(PredictionType.COMPLETE)).thenReturn(
             listOf(Prediction(station = s1, user = mock(), occupancyLevel = 4, type = PredictionType.COMPLETE))
         )
         val map = occupancyMapService.getOccupancyMap()
-        assertEquals(2, map.stations.size)
-        assertEquals(4, map.stations.find { it.stationId == "s1" }?.occupancyLevel)
-        assertEquals(PredictionType.COMPLETE, map.stations.find { it.stationId == "s1" }?.predictionType)
-    }
-
-    @Test
-    fun `getOccupancyMap defaults to level 1 COMPLETE when no predictions exist`() {
-        `when`(stationRepository.findAll()).thenReturn(listOf(s1))
-        `when`(predictionRepository.findLatestByType(PredictionType.COMPLETE)).thenReturn(emptyList())
-        val map = occupancyMapService.getOccupancyMap()
-        assertEquals(1, map.stations[0].occupancyLevel)
+        assertEquals(1, map.stations.size)
+        assertEquals("s1", map.stations[0].stationId)
+        assertEquals(4, map.stations[0].occupancyLevel)
         assertEquals(PredictionType.COMPLETE, map.stations[0].predictionType)
     }
 
     @Test
-    fun `getOccupancyMap returns all stations`() {
-        `when`(stationRepository.findAll()).thenReturn(listOf(s1, s2, s3))
+    fun `getOccupancyMap returns empty list when no predictions exist`() {
+        `when`(stationRepository.findAll()).thenReturn(listOf(s1))
         `when`(predictionRepository.findLatestByType(PredictionType.COMPLETE)).thenReturn(emptyList())
         val map = occupancyMapService.getOccupancyMap()
-        assertEquals(3, map.stations.size)
+        assertEquals(0, map.stations.size)
     }
 
     @Test
-    fun `getOccupancyMap handles mix of stations with and without predictions`() {
+    fun `getOccupancyMap returns only stations with predictions when some have none`() {
         `when`(stationRepository.findAll()).thenReturn(listOf(s1, s2))
         `when`(predictionRepository.findLatestByType(PredictionType.COMPLETE)).thenReturn(
             listOf(Prediction(station = s1, user = mock(), occupancyLevel = 3, type = PredictionType.COMPLETE))
         )
         val map = occupancyMapService.getOccupancyMap()
-        assertEquals(3, map.stations.find { it.stationId == "s1" }?.occupancyLevel)
-        assertEquals(1, map.stations.find { it.stationId == "s2" }?.occupancyLevel)
+        assertEquals(1, map.stations.size)
+        assertEquals("s1", map.stations[0].stationId)
+        assertEquals(3, map.stations[0].occupancyLevel)
     }
 
     @Test
-    fun `getOccupancyMap returns correct transport types`() {
-        `when`(stationRepository.findAll()).thenReturn(listOf(s1, s2))
+    fun `getOccupancyMap returns empty when findAll returns empty`() {
+        `when`(stationRepository.findAll()).thenReturn(emptyList())
         `when`(predictionRepository.findLatestByType(PredictionType.COMPLETE)).thenReturn(emptyList())
         val map = occupancyMapService.getOccupancyMap()
-        assertEquals(TransportType.METRO, map.stations.find { it.stationId == "s1" }?.transportType)
-        assertEquals(TransportType.TRAIN, map.stations.find { it.stationId == "s2" }?.transportType)
+        assertEquals(0, map.stations.size)
     }
 }
