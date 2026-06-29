@@ -219,7 +219,6 @@
                     when (currentDestination) {
                         AppDestinations.HOME -> LisbonOsmdroidMapScreen(mapViewModel)
                         AppDestinations.PLAN_TRIP -> PlanTripScreen(planTripViewModel)
-                        AppDestinations.SETTINGS -> LisbonOsmdroidMapScreen(mapViewModel)
                     }
                 }
             }
@@ -232,7 +231,6 @@
     ) {
         HOME(R.string.nav_home, Icons.Default.Home),
         PLAN_TRIP(R.string.nav_plan_trip, Icons.Default.DateRange),
-        SETTINGS(R.string.nav_settings, Icons.Default.Settings),
     }
 
     @Composable

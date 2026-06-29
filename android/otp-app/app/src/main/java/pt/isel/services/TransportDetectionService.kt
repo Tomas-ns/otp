@@ -33,6 +33,10 @@ class TransportDetectionService : Service() {
     private var telemetryJob: Job? = null
     private var isCollecting = false
 
+    companion object {
+        const val ACTION_STOP_SERVICE = "ACTION_STOP_SERVICE"
+    }
+
     override fun onCreate() {
         super.onCreate()
         locationService = LocationService(this)
@@ -60,6 +64,13 @@ class TransportDetectionService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_STOP_SERVICE) {
+            Log.d("TransportDetection", "Stop action received, stopping service")
+            stopForeground(Service.STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         startForeground(4, notificationHelper.createMonitoringNotification())
 
         locationService.startLocationUpdates()

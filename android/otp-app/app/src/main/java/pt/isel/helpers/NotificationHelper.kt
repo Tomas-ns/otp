@@ -9,6 +9,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import pt.isel.MainActivity
 import pt.isel.R
+import pt.isel.services.TransportDetectionService
 
 class NotificationHelper(private val context: Context) {
 
@@ -82,14 +83,28 @@ class NotificationHelper(private val context: Context) {
         notificationManager.notify(1, createTimerNotification(seconds))
     }
 
+
     fun createMonitoringNotification(): Notification {
-        return buildBaseNotification(
-            title = "OTP Monitor",
-            text = "Monitoring transport activity",
-            channelId = "transport_monitor_channel",
-            importance = NotificationManager.IMPORTANCE_LOW,
-            isOngoing = true
-        ).build()
+
+        val stopIntent = Intent(context, TransportDetectionService::class.java).apply {
+            action = TransportDetectionService.ACTION_STOP_SERVICE
+        }
+
+        val stopPendingIntent = PendingIntent.getService(
+            context,
+            0,
+            stopIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        return NotificationCompat.Builder(context, "transport_monitor_channel")
+            .setContentTitle("Deteção de Transportes")
+            .setContentText("A recolher dados em background...")
+            .setSmallIcon(R.drawable.ic_metro)
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .addAction(R.drawable.ic_metro, "Parar", stopPendingIntent)
+            .build()
     }
 
     fun sendTripFinishedNotification() {

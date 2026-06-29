@@ -121,7 +121,7 @@ fun LisbonOsmdroidMapScreen(viewModel: MapViewModel) {
                 val prediction = predictions?.find { it.stationId == station.stationId && it.transportType == TransportType.METRO }
 
                 if (prediction != null && metroBitmap != null) {
-                    val color = getOccupancyColor(1)
+                    val color = getOccupancyColor(prediction.occupancyLevel)
                     marker.icon = createOccupancyIcon(context, metroBitmap, color)
                 } else {
                     marker.icon = metroIcon
