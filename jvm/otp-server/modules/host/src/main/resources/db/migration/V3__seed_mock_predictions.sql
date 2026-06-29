@@ -15,8 +15,8 @@ VALUES
     ('terreiro_do_paco_metro', 'a0000000-0000-0000-0000-000000000001', 4, 'COMPLETE', NOW() - INTERVAL '3 minutes'),
     ('santa_apolonia_metro','a0000000-0000-0000-0000-000000000001', 1, 'COMPLETE', NOW() - INTERVAL '6 minutes'),
     ('jardim_zoologico_metro','a0000000-0000-0000-0000-000000000001', 5, 'COMPLETE', NOW() - INTERVAL '1 minute'),
-    ('cais_do_sodre_train', 'a0000000-0000-0000-0000-000000000001', 3, 'COMPLETE', NOW() - INTERVAL '2 minutes'),
-    ('cascais_train',       'a0000000-0000-0000-0000-000000000001', 2, 'COMPLETE', NOW() - INTERVAL '3 minutes'),
+    ('oriente_train',       'a0000000-0000-0000-0000-000000000001', 3, 'COMPLETE', NOW() - INTERVAL '2 minutes'),
+    ('setubal_train',       'a0000000-0000-0000-0000-000000000001', 2, 'COMPLETE', NOW() - INTERVAL '3 minutes'),
     ('sintra_train',        'a0000000-0000-0000-0000-000000000001', 4, 'COMPLETE', NOW() - INTERVAL '1 minute'),
     ('entrecampos_train',   'a0000000-0000-0000-0000-000000000001', 1, 'COMPLETE', NOW() - INTERVAL '5 minutes'),
     ('sete_rios_train',     'a0000000-0000-0000-0000-000000000001', 3, 'COMPLETE', NOW() - INTERVAL '4 minutes')

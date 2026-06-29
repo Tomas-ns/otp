@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 source = Path(__file__).resolve().parents[3] / (
-    "other_contributions/OTP_IsInTransport_PoC/app/src/main/java/com/otpiitpoc/LisbonTransportStations.kt"
+    "android/otp-app/app/src/main/java/pt/isel/transportdetector/LisbonTransportStations.kt"
 )
 target = Path(__file__).resolve().parents[1] / "modules/host/src/main/resources/db/migration/V2__seed_stations.sql"
 

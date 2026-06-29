@@ -15,13 +15,13 @@ class StationsTest {
     }
 
     @Test
-    fun trainStations_shouldHave44Stations() {
-        assertEquals(44, trainStations.size)
+    fun trainStations_shouldHave50Stations() {
+        assertEquals(50, trainStations.size)
     }
 
     @Test
-    fun totalStations_shouldBe94() {
-        assertEquals(94, metroStations.size + trainStations.size)
+    fun totalStations_shouldBe100() {
+        assertEquals(100, metroStations.size + trainStations.size)
     }
 
     @Test
@@ -74,17 +74,17 @@ class StationsTest {
     }
 
     @Test
-    fun firstTrainStation_shouldBeCruzQuebrada() {
+    fun firstTrainStation_shouldBeLisboaOriente() {
         val first = trainStations.first()
-        assertEquals("Cruz Quebrada", first.name)
-        assertEquals("cruz_quebrada_train", first.stationId)
+        assertEquals("Lisboa - Oriente", first.name)
+        assertEquals("oriente_train", first.stationId)
     }
 
     @Test
-    fun lastTrainStation_shouldBeAgualvaCacem() {
+    fun lastTrainStation_shouldBeMalveira() {
         val last = trainStations.last()
-        assertEquals("Agualva Cacém", last.name)
-        assertEquals("agualva_cacem_train", last.stationId)
+        assertEquals("Malveira", last.name)
+        assertEquals("malveira_train", last.stationId)
     }
 
     @Test
