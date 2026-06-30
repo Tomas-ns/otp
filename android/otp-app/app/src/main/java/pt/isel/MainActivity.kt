@@ -2,6 +2,7 @@
 
     import android.Manifest
     import android.content.Context
+    import android.content.Intent
     import android.os.Build
     import android.os.Bundle
     import androidx.activity.compose.rememberLauncherForActivityResult
@@ -61,6 +62,7 @@
     import pt.isel.map.MapViewModel
     import pt.isel.planTrip.PlanTripScreen
     import pt.isel.planTrip.PlanTripViewModel
+    import pt.isel.services.TransportDetectionService
     import pt.isel.settings.viewmodel.SettingsViewModel
     import pt.isel.ui.theme.FirstAppTheme
 
@@ -139,6 +141,15 @@
                         permissionLauncher.launch(
                             permissionsToRequest.toTypedArray()
                         )
+                    }
+                    LaunchedEffect(Unit) {
+                        val intent =
+                            Intent(this@MainActivity, TransportDetectionService::class.java)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(intent)
+                        } else {
+                            startService(intent)
+                        }
                     }
 
                     Surface(modifier = Modifier.fillMaxSize()) {

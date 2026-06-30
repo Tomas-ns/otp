@@ -32,25 +32,38 @@ class GeofenceManager(private val context: Context) {
 
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun addGeofences() {
-        val geofenceList = LisbonTransportStations.stations.map { station ->
-            createGeofence(station.id, station.lat, station.lng)
-        }
+        geofencingClient.removeGeofences(geofencePendingIntent).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("GeofenceManager", "Old geofences removed successfully.")
+            } else {
+                Log.e("GeofenceManager", "Failed to remove old geofences.")
+            }
 
-        val geofencingRequest = GeofencingRequest.Builder().apply {
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            addGeofences(geofenceList)
-        }.build()
+            val geofenceList = LisbonTransportStations.stations.map { station ->
+                createGeofence(station.id, station.lat, station.lng)
+            }
 
-        try {
-            geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
-                .addOnSuccessListener {
-                    Log.d("GeofenceManager", "${LisbonTransportStations.stations.size} geofences registered successfully")
-                }
-                .addOnFailureListener { e ->
-                    Log.e("GeofenceManager", "Geofence registration failed: ${e.message}", e)
-                }
-        } catch (e: SecurityException) {
-            Log.e("GeofenceManager", "Security exception adding geofences", e)
+            if (geofenceList.size > 100) {
+                Log.e("GeofenceManager", "CRITICAL ERROR: Trying to register ${geofenceList.size} geofences. Limit is 100!")
+                return@addOnCompleteListener
+            }
+
+            val geofencingRequest = GeofencingRequest.Builder().apply {
+                setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                addGeofences(geofenceList)
+            }.build()
+
+            try {
+                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
+                    .addOnSuccessListener {
+                        Log.d("GeofenceManager", "${geofenceList.size} geofences registered successfully")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("GeofenceManager", "Geofence registration failed: ${e.message}", e)
+                    }
+            } catch (e: SecurityException) {
+                Log.e("GeofenceManager", "Security exception adding geofences", e)
+            }
         }
     }
 

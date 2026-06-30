@@ -97,12 +97,14 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        return NotificationCompat.Builder(context, "transport_monitor_channel")
-            .setContentTitle("Deteção de Transportes")
-            .setContentText("A recolher dados em background...")
-            .setSmallIcon(R.drawable.ic_metro)
-            .setOngoing(true)
-            .setAutoCancel(false)
+        return buildBaseNotification(
+            title = "Deteção de Transportes",
+            text = "A recolher dados em background...",
+            channelId = "transport_monitor_channel",
+            importance = NotificationManager.IMPORTANCE_LOW,
+            isOngoing = true,
+            autoCancel = false
+        )
             .addAction(R.drawable.ic_metro, "Parar", stopPendingIntent)
             .build()
     }

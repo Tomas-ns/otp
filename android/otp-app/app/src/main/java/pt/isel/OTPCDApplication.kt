@@ -14,6 +14,5 @@ class OTPCDApplication: Application() {
         super.onCreate()
         settingsRepository = SettingsPreferenceRepository(dataStore)
 
-        startForegroundService(Intent(this, TransportDetectionService::class.java))
     }
 }

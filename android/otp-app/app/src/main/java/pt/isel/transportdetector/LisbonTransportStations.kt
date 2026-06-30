@@ -56,7 +56,7 @@ object LisbonTransportStations {
         TransportStation("telheiras_metro", "Telheiras", 38.7600738, -9.1664236),
         TransportStation("terreiro_do_paco_metro", "Terreiro do Paco", 38.7070519, -9.1343878),
 
-        // Comboio (50 estacoes: centro, Sintra, Azambuja, Margem Sul, outras)
+        // Comboio
         TransportStation("oriente_train", "Lisboa - Oriente", 38.7678206, -9.0990726),
         TransportStation("braco_de_prata_train", "Braco de Prata", 38.7470910, -9.1028003),
         TransportStation("marvila_train", "Marvila", 38.7390314, -9.1087569),

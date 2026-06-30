@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import pt.isel.R
 import pt.isel.domain.metroStations
 import pt.isel.domain.trainStations
-//import pt.isel.map.trainStations
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -240,7 +239,6 @@ fun PlanTripScreen(viewModel: PlanTripViewModel) {
                     TextButton(onClick = {
                         showDatePicker = false
                         datePickerState.selectedDateMillis?.let { millis ->
-                            // Os formatos não vão para o XML
                             val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                             val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
                             calendar.timeInMillis = millis
