@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OTP-CD_testModel</string>
+    <string name="app_name">OTP-APP</string>
     <string name="nav_home">Home</string>
     <string name="nav_plan_trip">Plan trip</string>
     <string name="nav_settings">Settings</string>
