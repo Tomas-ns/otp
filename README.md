@@ -11,9 +11,9 @@ Sistema de crowdsourcing para determinação da ocupação de transportes públi
 
 ## Instalação
 
-Para instalar e utilizar a aplicação, baixe o APK diretamente da nossa página de releases:
+Para instalar e utilizar a aplicação, baixe o APK através do link abaixo:
 
-[Baixar APK]()
+[Baixar APK](https://drive.google.com/file/d/1kkSJ5yxlVnhNpY1TQE8T58DvCP-xUyHr/view?usp=sharing)
 
 ## Utilização
 
